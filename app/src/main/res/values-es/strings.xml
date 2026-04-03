@@ -58,8 +58,10 @@
     <string name="option_lyrics">Lyrics</string>
     <string name="transition_mixing">Mezclando</string>
     <string name="transition_crossfade">Crossfade</string>
-    <string name="unknown_artist">Artista Desconocido</string>
-    <string name="unknown_album">Álbum Desconocido</string>
+    <string name="unknown_artist">Artista desconocido</string>
+    <string name="unknown_album">Álbum desconocido</string>
+    <string name="unknown_song">Canción desconocida</string>
+    <string name="most_played_desc">Más escuchada</string>
 
     <!-- Accessibility / Icons -->
     <string name="cd_menu">Menú</string>
@@ -197,6 +199,13 @@
     <string name="stats_minutes_unit">%dm</string>
     <string name="stats_seconds_unit">%ds</string>
     <string name="total_songs">Total de canciones</string>
+    <string name="stats_top_playlist">Tu Playlist Top</string>
+    <string name="stats_top_songs">Canciones del momento</string>
+    <string name="stats_artist_moment">Artista del momento</string>
+    <string name="stats_playlist_message">¡Esta lista no para! 🎵</string>
+    <string name="stats_songs_message">¡Tus éxitos más repetidos! 🔥</string>
+    <string name="stats_music_unit">de música</string>
+    <string name="stats_loading_hits">Cargando tus éxitos…</string>
 
     <!-- Onboarding -->
     <string name="onboarding_description">El reproductor de música más avanzado para tu dispositivo.</string>

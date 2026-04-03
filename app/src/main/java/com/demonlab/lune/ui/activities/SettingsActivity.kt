@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Check
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import androidx.compose.material3.*
@@ -261,7 +262,16 @@ fun SettingsScreen(onBack: () -> Unit) {
                             onCheckedChange = {
                                 showHiFi = it
                                 settingsManager.enableHiFi = it
-                            }
+                            },
+                            thumbContent = if (showHiFi) {
+                                {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(SwitchDefaults.IconSize)
+                                    )
+                                }
+                            } else null
                         )
                     }
                 )
@@ -276,7 +286,16 @@ fun SettingsScreen(onBack: () -> Unit) {
                             onCheckedChange = {
                                 showDownloadCovers = it
                                 settingsManager.downloadCovers = it
-                            }
+                            },
+                            thumbContent = if (showDownloadCovers) {
+                                {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(SwitchDefaults.IconSize)
+                                    )
+                                }
+                            } else null
                         )
                     }
                 )
@@ -291,7 +310,16 @@ fun SettingsScreen(onBack: () -> Unit) {
                             onCheckedChange = {
                                 isCinematicEnabled = it
                                 settingsManager.isCinematicPlayerEnabled = it
-                            }
+                            },
+                            thumbContent = if (isCinematicEnabled) {
+                                {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(SwitchDefaults.IconSize)
+                                    )
+                                }
+                            } else null
                         )
                     }
                 )

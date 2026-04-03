@@ -219,16 +219,16 @@ class PlaybackManager private constructor(private val context: Context) {
                 activeCategory = category
                 settings.activeCategory = category
             }
+
+            // Sync shuffle state for this playlist/context
+            if (playlistId != null) {
+                isShuffle = settings.getPlaylistShuffle(playlistId)
+            } else {
+                isShuffle = settings.isShuffle
+            }
+            
+            if (isShuffle) updateShuffledQueue()
         }
-        
-        // Sync shuffle state for this playlist/context (Moved outside if to catch state changes)
-        if (playlistId != null) {
-            isShuffle = settings.getPlaylistShuffle(playlistId)
-        } else {
-            isShuffle = settings.isShuffle
-        }
-        
-        if (isShuffle) updateShuffledQueue()
         
         isQueueFinished = false
         settings.lastPlayedSongId = song.id
@@ -260,6 +260,9 @@ class PlaybackManager private constructor(private val context: Context) {
         } else {
             pendingPlaySong = song
         }
+        
+        // Record stat: New Play
+        updatePlaybackStats("SONG", "SONG_${song.id}", incrementCount = true)
     }
 
     fun startVisualizer() {
@@ -492,6 +495,9 @@ class PlaybackManager private constructor(private val context: Context) {
                 currentShufflePosition = shuffledIndices.indexOf(idx)
             }
         }
+        
+        // Record stat: New Play (Automatic/Crossfade)
+        updatePlaybackStats("SONG", "SONG_${song.id}", incrementCount = true)
     }
 
     fun pause() {
@@ -547,6 +553,45 @@ class PlaybackManager private constructor(private val context: Context) {
         } else {
             dailyListeningTime += 1000
             settings.dailyListeningTime = dailyListeningTime
+        }
+
+        // Detailed Stats
+        val song = currentSong
+        if (song != null) {
+            updatePlaybackStats("SONG", "SONG_${song.id}", timeMs = 1000)
+            if (song.artist.isNotBlank() && song.artist != "<unknown>") {
+                updatePlaybackStats("ARTIST", "ARTIST_${song.artist}", timeMs = 1000)
+            }
+        }
+        val pId = activePlaylistId
+        if (pId != null && pId != -1L) {
+            updatePlaybackStats("PLAYLIST", "PLAYLIST_$pId", timeMs = 1000)
+        }
+    }
+
+    private fun updatePlaybackStats(type: String, id: String, timeMs: Long = 0, incrementCount: Boolean = false) {
+        managerScope.launch(Dispatchers.IO) {
+            try {
+                val db = com.demonlab.lune.data.MusicDatabase.getDatabase(context)
+                val dao = db.playbackStatsDao()
+                val existing = dao.getStatsById(id)
+                if (existing != null) {
+                    dao.insertStats(existing.copy(
+                        playCount = if (incrementCount) existing.playCount + 1 else existing.playCount,
+                        totalTimeMs = existing.totalTimeMs + timeMs,
+                        lastPlayed = System.currentTimeMillis()
+                    ))
+                } else {
+                    dao.insertStats(com.demonlab.lune.data.PlaybackStats(
+                        id = id,
+                        type = type,
+                        playCount = if (incrementCount) 1 else 0,
+                        totalTimeMs = timeMs
+                    ))
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 

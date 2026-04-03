@@ -60,6 +60,8 @@
     <string name="transition_crossfade">Crossfade</string>
     <string name="unknown_artist">Unknown Artist</string>
     <string name="unknown_album">Unknown Album</string>
+    <string name="unknown_song">Unknown Song</string>
+    <string name="most_played_desc">Most played</string>
     
     <!-- Accessibility / Icons -->
     <string name="cd_menu">Menu</string>
@@ -198,6 +200,13 @@
     <string name="stats_minutes_unit">%dm</string>
     <string name="stats_seconds_unit">%ds</string>
     <string name="total_songs">Total songs</string>
+    <string name="stats_top_playlist">Your Top Playlist</string>
+    <string name="stats_top_songs">Top Songs</string>
+    <string name="stats_artist_moment">Artist of the Moment</string>
+    <string name="stats_playlist_message">This list doesn\'t stop playing! 🎵</string>
+    <string name="stats_songs_message">Your most repeated hits! 🔥</string>
+    <string name="stats_music_unit">of music</string>
+    <string name="stats_loading_hits">Loading your hits…</string>
 
     <!-- Onboarding -->
     <string name="onboarding_description">The most advanced music player for your device.</string>

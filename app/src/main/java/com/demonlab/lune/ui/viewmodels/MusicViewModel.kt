@@ -12,6 +12,7 @@ import com.demonlab.lune.tools.MetadataManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.collect
 
 class MusicViewModel(application: Application) : AndroidViewModel(application) {
     private val musicProvider = MusicProvider(application)
@@ -100,6 +101,13 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
         private set
 
     var playlistMappings by mutableStateOf<List<com.demonlab.lune.data.PlaylistSong>>(emptyList())
+        private set
+
+    var topSongStats by mutableStateOf<List<com.demonlab.lune.data.PlaybackStats>>(emptyList())
+        private set
+    var topPlaylistStats by mutableStateOf<List<com.demonlab.lune.data.PlaybackStats>>(emptyList())
+        private set
+    var topArtistStats by mutableStateOf<List<com.demonlab.lune.data.PlaybackStats>>(emptyList())
         private set
 
     fun loadPlaylists() {
@@ -249,6 +257,23 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    private fun observeStats() {
+        viewModelScope.launch {
+            val db = com.demonlab.lune.data.MusicDatabase.getDatabase(getApplication())
+            val dao = db.playbackStatsDao()
+            
+            launch {
+                dao.getTopByCountFlow("SONG", 3).collect { topSongStats = it }
+            }
+            launch {
+                dao.getTopByTimeFlow("PLAYLIST", 1).collect { topPlaylistStats = it }
+            }
+            launch {
+                dao.getTopByTimeFlow("ARTIST", 1).collect { topArtistStats = it }
+            }
+        }
+    }
+
     fun prepareDeleteSong(song: Song) {
         if (!visuallyDeletedIds.contains(song.id)) {
             visuallyDeletedIds.add(song.id)
@@ -294,6 +319,7 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
     init {
         loadSongs()
         loadPlaylists()
+        observeStats()
     }
 }
 

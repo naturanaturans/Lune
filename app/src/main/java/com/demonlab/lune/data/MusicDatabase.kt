@@ -94,10 +94,42 @@ interface PlaylistDao {
     suspend fun getPlaylistCountForSong(songId: Long): Int
 }
 
-@Database(entities = [SongOverride::class, Playlist::class, PlaylistSong::class], version = 4, exportSchema = false)
+@Entity(tableName = "playback_stats")
+data class PlaybackStats(
+    @PrimaryKey val id: String, // e.g., "SONG_123", "PLAYLIST_456", "ARTIST_Queen"
+    val type: String, // "SONG", "PLAYLIST", "ARTIST"
+    val playCount: Long = 0,
+    val totalTimeMs: Long = 0,
+    val lastPlayed: Long = System.currentTimeMillis()
+)
+
+@Dao
+interface PlaybackStatsDao {
+    @Query("SELECT * FROM playback_stats WHERE id = :id")
+    suspend fun getStatsById(id: String): PlaybackStats?
+
+    @Query("SELECT * FROM playback_stats WHERE type = :type ORDER BY playCount DESC LIMIT :limit")
+    fun getTopByCountFlow(type: String, limit: Int): kotlinx.coroutines.flow.Flow<List<PlaybackStats>>
+
+    @Query("SELECT * FROM playback_stats WHERE type = :type ORDER BY totalTimeMs DESC LIMIT :limit")
+    fun getTopByTimeFlow(type: String, limit: Int): kotlinx.coroutines.flow.Flow<List<PlaybackStats>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertStats(stats: PlaybackStats)
+}
+
+@Database(
+    entities = [SongOverride::class, Playlist::class, PlaylistSong::class, PlaybackStats::class],
+    version = 6,
+    autoMigrations = [
+        AutoMigration(from = 5, to = 6)
+    ],
+    exportSchema = true
+)
 abstract class MusicDatabase : RoomDatabase() {
     abstract fun songOverrideDao(): SongOverrideDao
     abstract fun playlistDao(): PlaylistDao
+    abstract fun playbackStatsDao(): PlaybackStatsDao
 
     companion object {
         @Volatile
@@ -110,7 +142,6 @@ abstract class MusicDatabase : RoomDatabase() {
                     MusicDatabase::class.java,
                     "music_database"
                 )
-                    .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
                 instance
