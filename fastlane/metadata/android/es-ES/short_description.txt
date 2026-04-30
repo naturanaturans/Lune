@@ -1,1 +1,0 @@
-Reproductor de música local moderno de código abierto para Android
