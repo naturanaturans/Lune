@@ -47,7 +47,6 @@ height="40">](https://f-droid.org/es/packages/com.demonlab.lune/)
 - **HI-FI audio**: The application supports audio in HI-FI formats.
 - **Language**: Available in Spanish and English.
 - **Custom tittle**: Customize the application title from the settings.
-- **Cover download**: The application can access the internet to download song covers using the Deezer API; this option can be disabled in settings.
 
 ## 📱 ScreenShot
 
