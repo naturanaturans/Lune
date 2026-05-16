@@ -2,15 +2,34 @@
   <img src="readme-res/logo.png" width="20%" />
   <br><br>
     <p align="center">
-      <img src="https://img.shields.io/badge/Lune-1.0.0-blue?style=for-the-badge&logo=android&logoColor=white" />
+      <img src="https://img.shields.io/github/v/release/MrDemonc/Lune?style=for-the-badge&logo=android&label=Lune&color=blue" />
       <img src="https://img.shields.io/badge/Android-API%2024%2B-green?style=for-the-badge&logo=android&logoColor=white" />
-      <img src="https://img.shields.io/badge/Kotlin-100%25-orange?style=for-the-badge&logo=kotlin&logoColor=white" />
+      <img src="https://img.shields.io/badge/Kotlin-100%25-orange?style=for-the-badge&logo=kotlin&logoColor=white" /><br>
+      <a href="ttps://www.paypal.com/paypalme/TommyZambrano">
+        <img src="https://img.shields.io/badge/PayPal-Donate-00457C?style=for-the-badge&logo=paypal&logoColor=white"/>
+      </a>
+      <a href="https://ko-fi.com/mrdemonc">
+        <img src="https://img.shields.io/badge/Ko--fi-Buy me a coffee-FF5E5B?style=for-the-badge&logo=kofi&logoColor=white"/>
+      </a>
     </p>
     <p align="center">
       Lune is a minimalist and elegant music player for Android, designed with a focus on aesthetics and a premium user experience. 
       It features a modern Jetpack Compose UI, dynamic color support, and a unique high-quality dark defocus widget system.
     </p>
 </p>
+
+## 📱 F-Droid Information
+
+Lune is designed to be fully open-source and compatible with F-Droid's build standards:
+
+- **Pure Gradle Build**: No proprietary pre-compiled binaries.
+- **Standard Metadata**: Compatible with F-Droid build recipes.
+
+**Get app in:**
+
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+alt="Get it on F-Droid"
+height="40">](https://f-droid.org/es/packages/com.demonlab.lune/)
 
 ## ✨ Features
 
@@ -81,20 +100,7 @@ keyPassword=password
    ```bash
    ./gradlew assembleRelease
    ```
-   The output APK will be available at: `app/build/outputs/apk/release/app-release.apk` (if not signed).
-
-## 📱 F-Droid Information
-
-Lune is designed to be fully open-source and compatible with F-Droid's build standards:
-
-- **Pure Gradle Build**: No proprietary pre-compiled binaries.
-- **Standard Metadata**: Compatible with F-Droid build recipes.
-
-## 💰 Donation
-
-If you would like to support the development of Lune, you can do so through the following platforms:
-
-- **PayPal**: [https://www.paypal.com/paypalme/TommyZambrano](https://www.paypal.com/paypalme/TommyZambrano)
+   The output APK will be available at: `app/build/outputs/apk/release/Lune-release.apk`
 
 ## 🤝 Credits
 
@@ -102,5 +108,6 @@ If you would like to support the development of Lune, you can do so through the 
 - **Desukia**: Design testing and UX feedback.
 
 ---
-
-_Lune - Listen with style._
+<p align=center>
+  <b><i></b>💫Lune - Listen with style💫</i></b>
+</p>
