@@ -1823,15 +1823,13 @@ fun FolderFilterContent(
                                     onSelectedFolderChange("ALL")
                                 }
                             },
-                            thumbContent = if (!isHidden) {
-                                {
-                                    Icon(
-                                        imageVector = Icons.Default.Check,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(SwitchDefaults.IconSize)
-                                    )
-                                }
-                            } else null
+                            thumbContent = {
+                                Icon(
+                                    imageVector = if (!isHidden) Icons.Default.Check else Icons.Default.Close,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(SwitchDefaults.IconSize)
+                                )
+                            }
                         )
                     },
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent)
@@ -1976,15 +1974,13 @@ fun EqBottomSheet(
                 Switch(
                     checked = playbackManager.isBassBoostEnabled,
                     onCheckedChange = { playbackManager.toggleBassBoost() },
-                    thumbContent = if (playbackManager.isBassBoostEnabled) {
-                        {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = null,
-                                modifier = Modifier.size(SwitchDefaults.IconSize)
-                            )
-                        }
-                    } else null
+                    thumbContent = {
+                        Icon(
+                            imageVector = if (playbackManager.isBassBoostEnabled) Icons.Default.Check else Icons.Default.Close,
+                            contentDescription = null,
+                            modifier = Modifier.size(SwitchDefaults.IconSize)
+                        )
+                    }
                 )
             }
             
@@ -1999,15 +1995,13 @@ fun EqBottomSheet(
                 Switch(
                     checked = playbackManager.isSpatialAudioEnabled,
                     onCheckedChange = { playbackManager.toggleSpatialAudio() },
-                    thumbContent = if (playbackManager.isSpatialAudioEnabled) {
-                        {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = null,
-                                modifier = Modifier.size(SwitchDefaults.IconSize)
-                            )
-                        }
-                    } else null
+                    thumbContent = {
+                        Icon(
+                            imageVector = if (playbackManager.isSpatialAudioEnabled) Icons.Default.Check else Icons.Default.Close,
+                            contentDescription = null,
+                            modifier = Modifier.size(SwitchDefaults.IconSize)
+                        )
+                    }
                 )
             }
             
@@ -3112,15 +3106,13 @@ fun VisualizerSettingsBottomSheet(
                     Switch(
                         checked = playbackManager.isFullPlayerVisualizerEnabled,
                         onCheckedChange = { toggleVisualizer(true) },
-                        thumbContent = if (playbackManager.isFullPlayerVisualizerEnabled) {
-                            {
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(SwitchDefaults.IconSize)
-                                )
-                            }
-                        } else null
+                        thumbContent = {
+                            Icon(
+                                imageVector = if (playbackManager.isFullPlayerVisualizerEnabled) Icons.Default.Check else Icons.Default.Close,
+                                contentDescription = null,
+                                modifier = Modifier.size(SwitchDefaults.IconSize)
+                            )
+                        }
                     )
                 },
                 modifier = Modifier.clickable { toggleVisualizer(true) }
@@ -3132,15 +3124,13 @@ fun VisualizerSettingsBottomSheet(
                     Switch(
                         checked = playbackManager.isMiniPlayerVisualizerEnabled,
                         onCheckedChange = { toggleVisualizer(false) },
-                        thumbContent = if (playbackManager.isMiniPlayerVisualizerEnabled) {
-                            {
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(SwitchDefaults.IconSize)
-                                )
-                            }
-                        } else null
+                        thumbContent = {
+                            Icon(
+                                imageVector = if (playbackManager.isMiniPlayerVisualizerEnabled) Icons.Default.Check else Icons.Default.Close,
+                                contentDescription = null,
+                                modifier = Modifier.size(SwitchDefaults.IconSize)
+                            )
+                        }
                     )
                 },
                 modifier = Modifier.clickable { toggleVisualizer(false) }

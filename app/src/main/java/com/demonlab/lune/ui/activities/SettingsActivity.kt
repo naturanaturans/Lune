@@ -257,15 +257,13 @@ fun SettingsScreen(
                                 showHiFi = it
                                 settingsManager.enableHiFi = it
                             },
-                            thumbContent = if (showHiFi) {
-                                {
-                                    Icon(
-                                        imageVector = Icons.Default.Check,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(SwitchDefaults.IconSize)
-                                    )
-                                }
-                            } else null
+                            thumbContent = {
+                                Icon(
+                                    imageVector = if (showHiFi) Icons.Default.Check else Icons.Default.Close,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(SwitchDefaults.IconSize)
+                                )
+                            }
                         )
                     }
                 )
@@ -282,15 +280,13 @@ fun SettingsScreen(
                                 isCinematicEnabled = it
                                 settingsManager.isCinematicPlayerEnabled = it
                             },
-                            thumbContent = if (isCinematicEnabled) {
-                                {
-                                    Icon(
-                                        imageVector = Icons.Default.Check,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(SwitchDefaults.IconSize)
-                                    )
-                                }
-                            } else null
+                            thumbContent = {
+                                Icon(
+                                    imageVector = if (isCinematicEnabled) Icons.Default.Check else Icons.Default.Close,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(SwitchDefaults.IconSize)
+                                )
+                            }
                         )
                     }
                 )
