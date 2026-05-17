@@ -2897,7 +2897,7 @@ fun QueueBottomSheet(
                         currentlyPlaying = false,
                         isPlaying = false,
                         onClick = { 
-                            playbackManager.play(song, activePlaylist, playbackManager.activePlaylistId, playbackManager.activeCategory)
+                            playbackManager.play(song, activePlaylist, playbackManager.activePlaylistId, playbackManager.activeCategory, fromQueue = true)
                         },
                         onOptionsClick = {
                             optionsSong = song

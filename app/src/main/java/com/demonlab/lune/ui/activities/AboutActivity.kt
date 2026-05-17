@@ -176,6 +176,9 @@ fun AboutScreen() {
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text="Github"
+                    )
                 }
                 Button(
                     onClick = { 
@@ -190,6 +193,9 @@ fun AboutScreen() {
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Donate"
+                    )
                 }
             }
 

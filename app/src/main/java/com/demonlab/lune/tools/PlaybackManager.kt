@@ -208,7 +208,7 @@ class PlaybackManager private constructor(private val context: Context) {
         }
     }
 
-    fun play(song: Song, playlist: List<Song> = emptyList(), playlistId: Long? = null, category: String? = null) {
+    fun play(song: Song, playlist: List<Song> = emptyList(), playlistId: Long? = null, category: String? = null, fromQueue: Boolean = false) {
         currentSong = song
         isPlaying = true
         if (playlist.isNotEmpty() && (playlist != activePlaylist || activePlaylist.isEmpty() || playlistId != activePlaylistId)) {
@@ -228,6 +228,9 @@ class PlaybackManager private constructor(private val context: Context) {
             }
             
             if (isShuffle) updateShuffledQueue()
+        } else if (!fromQueue && playlist.isNotEmpty() && isShuffle) {
+            // Clicked from a playlist that is already active
+            updateShuffledQueue()
         }
         
         isQueueFinished = false
@@ -241,7 +244,20 @@ class PlaybackManager private constructor(private val context: Context) {
         } else if (isShuffle && shuffledIndices.isNotEmpty()) {
             val idx = activePlaylist.indexOfFirst { it.id == song.id }
             if (idx != -1) {
-                currentShufflePosition = shuffledIndices.indexOf(idx)
+                if (fromQueue) {
+                    val posInShuffle = shuffledIndices.indexOf(idx)
+                    if (posInShuffle != -1 && posInShuffle > currentShufflePosition) {
+                        val mutableShuffle = shuffledIndices.toMutableList()
+                        mutableShuffle.removeAt(posInShuffle)
+                        currentShufflePosition++
+                        mutableShuffle.add(currentShufflePosition, idx)
+                        shuffledIndices = mutableShuffle
+                    } else {
+                        currentShufflePosition = posInShuffle
+                    }
+                } else {
+                    currentShufflePosition = shuffledIndices.indexOf(idx)
+                }
             }
         }
 
