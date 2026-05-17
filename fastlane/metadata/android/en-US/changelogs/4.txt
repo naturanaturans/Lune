@@ -1,0 +1,4 @@
+Customization settings
+Style toggles
+Fix queue bug in shuffle mode
+Add avertence in backup section
