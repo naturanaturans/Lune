@@ -70,6 +70,13 @@ android {
         includeInApk = false
         includeInBundle = false
     }
+
+    packaging {
+        resources {
+            excludes.add("**/baseline.prof")
+            excludes.add("**/baseline.profm")
+        }
+    }
 }
 
 base {
@@ -107,4 +114,19 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+}
+
+androidComponents {
+    onVariants { variant ->
+        val variantName = variant.name
+        val capitalizedName = variantName.replaceFirstChar { it.uppercase() }
+        
+        // Disable Art Profile tasks to ensure reproducible builds in F-Droid
+        tasks.matching { 
+            it.name == "compile${capitalizedName}ArtProfile" || 
+            it.name == "merge${capitalizedName}ArtProfile" 
+        }.configureEach {
+            enabled = false
+        }
+    }
 }

@@ -7,6 +7,13 @@ import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.support.v4.media.session.MediaSessionCompat
+import android.net.Uri
+import android.content.ContentUris
+import android.os.Bundle
+import android.support.v4.media.MediaBrowserCompat
+import android.support.v4.media.MediaDescriptionCompat
+import androidx.media.MediaBrowserServiceCompat
+import com.demonlab.lune.data.MusicDatabase
 import androidx.core.app.NotificationCompat
 import androidx.media.app.NotificationCompat.MediaStyle
 import coil.ImageLoader
@@ -32,7 +39,7 @@ import android.graphics.Bitmap
 import android.widget.RemoteViews
 import android.media.AudioDeviceInfo
 
-class MusicService : Service() {
+class MusicService : MediaBrowserServiceCompat() {
     private var mediaPlayer: MediaPlayer? = null
     private var secondaryPlayer: MediaPlayer? = null
     private var isCrossfading = false
@@ -113,9 +120,47 @@ class MusicService : Service() {
                     PlaybackManager.getInstance(applicationContext).playPreviousFromService()
                 }
                 override fun onSeekTo(pos: Long) { seekTo(pos.toInt()) }
+
+                override fun onPlayFromMediaId(mediaId: String?, extras: Bundle?) {
+                    if (mediaId == null) return
+                    serviceScope.launch {
+                        val playbackManager = PlaybackManager.getInstance(applicationContext)
+                        val provider = MusicProvider(applicationContext)
+                        val db = MusicDatabase.getDatabase(applicationContext)
+                        
+                        val hiddenFolders = settingsManager.hiddenFolders
+                        when {
+                            mediaId.startsWith("song_allsongs_") -> {
+                                val songId = mediaId.substringAfter("song_allsongs_").toLongOrNull() ?: return@launch
+                                val songs = provider.getCachedSongs().filter { !hiddenFolders.contains(it.folderName) }
+                                val targetSong = songs.find { it.id == songId } ?: return@launch
+                                playbackManager.play(targetSong, songs, -100L, category = "ALL")
+                            }
+                            mediaId.startsWith("song_favs_") -> {
+                                val songId = mediaId.substringAfter("song_favs_").toLongOrNull() ?: return@launch
+                                val songs = provider.getCachedSongs().filter { it.isFavorite && !hiddenFolders.contains(it.folderName) }
+                                val targetSong = songs.find { it.id == songId } ?: return@launch
+                                playbackManager.play(targetSong, songs, -200L, category = "FAVORITES")
+                            }
+                            mediaId.startsWith("song_playlist_") -> {
+                                val parts = mediaId.removePrefix("song_playlist_").split("_")
+                                if (parts.size < 2) return@launch
+                                val playlistId = parts[0].toLongOrNull() ?: return@launch
+                                val songId = parts[1].toLongOrNull() ?: return@launch
+                                
+                                val songIds = db.playlistDao().getSongIdsForPlaylist(playlistId)
+                                val allCached = provider.getCachedSongs()
+                                val playlistSongs = songIds.mapNotNull { id -> allCached.find { it.id == id } }
+                                val targetSong = playlistSongs.find { it.id == songId } ?: return@launch
+                                playbackManager.play(targetSong, playlistSongs, playlistId, category = "PLAYLISTS")
+                            }
+                        }
+                    }
+                }
             })
             isActive = true
         }
+        sessionToken = mediaSession?.sessionToken
         settingsManager = SettingsManager.getInstance(this)
     }
 
@@ -216,7 +261,126 @@ class MusicService : Service() {
     }
 
 
-    override fun onBind(intent: Intent?): IBinder = binder
+    override fun onBind(intent: Intent?): IBinder? {
+        return if (intent?.action == "android.media.browse.MediaBrowserService") {
+            super.onBind(intent)
+        } else {
+            binder
+        }
+    }
+
+    override fun onGetRoot(clientPackageName: String, clientUid: Int, rootHints: Bundle?): BrowserRoot? {
+        return BrowserRoot("root", null)
+    }
+
+    override fun onLoadChildren(parentId: String, result: androidx.media.MediaBrowserServiceCompat.Result<MutableList<MediaBrowserCompat.MediaItem>>) {
+        result.detach()
+        serviceScope.launch {
+            val mediaItems = mutableListOf<MediaBrowserCompat.MediaItem>()
+            val provider = MusicProvider(applicationContext)
+            val db = MusicDatabase.getDatabase(applicationContext)
+
+            try {
+                when (parentId) {
+                    "root" -> {
+                        val songsItem = MediaDescriptionCompat.Builder()
+                            .setMediaId("all_songs")
+                            .setTitle(getString(R.string.tab_songs))
+                            .build()
+                        mediaItems.add(MediaBrowserCompat.MediaItem(songsItem, MediaBrowserCompat.MediaItem.FLAG_BROWSABLE))
+
+                        val favoritesItem = MediaDescriptionCompat.Builder()
+                            .setMediaId("favorites")
+                            .setTitle(getString(R.string.tab_favorites))
+                            .build()
+                        mediaItems.add(MediaBrowserCompat.MediaItem(favoritesItem, MediaBrowserCompat.MediaItem.FLAG_BROWSABLE))
+
+                        val playlistsItem = MediaDescriptionCompat.Builder()
+                            .setMediaId("playlists")
+                            .setTitle(getString(R.string.playlists))
+                            .build()
+                        mediaItems.add(MediaBrowserCompat.MediaItem(playlistsItem, MediaBrowserCompat.MediaItem.FLAG_BROWSABLE))
+                    }
+                    "all_songs" -> {
+                        val hidden = settingsManager.hiddenFolders
+                        val songs = provider.getCachedSongs().filter { !hidden.contains(it.folderName) }
+                        for (song in songs) {
+                            val desc = MediaDescriptionCompat.Builder()
+                                .setMediaId("song_allsongs_${song.id}")
+                                .setTitle(song.title)
+                                .setSubtitle(song.artist)
+                                .setIconUri(
+                                    if (song.coverUrl != null) {
+                                        Uri.parse(song.coverUrl)
+                                    } else {
+                                        ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart"), song.albumId)
+                                    }
+                                )
+                                .build()
+                            mediaItems.add(MediaBrowserCompat.MediaItem(desc, MediaBrowserCompat.MediaItem.FLAG_PLAYABLE))
+                        }
+                    }
+                    "favorites" -> {
+                        val hidden = settingsManager.hiddenFolders
+                        val songs = provider.getCachedSongs().filter { it.isFavorite && !hidden.contains(it.folderName) }
+                        for (song in songs) {
+                            val desc = MediaDescriptionCompat.Builder()
+                                .setMediaId("song_favs_${song.id}")
+                                .setTitle(song.title)
+                                .setSubtitle(song.artist)
+                                .setIconUri(
+                                    if (song.coverUrl != null) {
+                                        Uri.parse(song.coverUrl)
+                                    } else {
+                                        ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart"), song.albumId)
+                                    }
+                                )
+                                .build()
+                            mediaItems.add(MediaBrowserCompat.MediaItem(desc, MediaBrowserCompat.MediaItem.FLAG_PLAYABLE))
+                        }
+                    }
+                    "playlists" -> {
+                        val playlists = db.playlistDao().getAllPlaylists()
+                        for (playlist in playlists) {
+                            val desc = MediaDescriptionCompat.Builder()
+                                .setMediaId("playlist_${playlist.id}")
+                                .setTitle(playlist.name)
+                                .build()
+                            mediaItems.add(MediaBrowserCompat.MediaItem(desc, MediaBrowserCompat.MediaItem.FLAG_BROWSABLE))
+                        }
+                    }
+                    else -> {
+                        if (parentId.startsWith("playlist_")) {
+                            val playlistId = parentId.removePrefix("playlist_").toLongOrNull()
+                            if (playlistId != null) {
+                                val songIds = db.playlistDao().getSongIdsForPlaylist(playlistId)
+                                val allCached = provider.getCachedSongs()
+                                val playlistSongs = songIds.mapNotNull { id -> allCached.find { it.id == id } }
+                                for (song in playlistSongs) {
+                                    val desc = MediaDescriptionCompat.Builder()
+                                        .setMediaId("song_playlist_${playlistId}_${song.id}")
+                                        .setTitle(song.title)
+                                        .setSubtitle(song.artist)
+                                        .setIconUri(
+                                            if (song.coverUrl != null) {
+                                                Uri.parse(song.coverUrl)
+                                            } else {
+                                                ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart"), song.albumId)
+                                            }
+                                        )
+                                        .build()
+                                    mediaItems.add(MediaBrowserCompat.MediaItem(desc, MediaBrowserCompat.MediaItem.FLAG_PLAYABLE))
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+            result.sendResult(mediaItems)
+        }
+    }
 
     fun playSong(song: Song) {
         isCrossfading = false
