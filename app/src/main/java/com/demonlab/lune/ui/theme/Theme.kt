@@ -169,6 +169,8 @@ fun LuneTheme(
             val window = (view.context as Activity).window
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
             WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = !darkTheme
+            window.navigationBarColor = android.graphics.Color.TRANSPARENT
+            window.statusBarColor = android.graphics.Color.TRANSPARENT
         }
     }
 }

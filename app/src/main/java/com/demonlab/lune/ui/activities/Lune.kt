@@ -15,6 +15,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.SystemBarStyle
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -181,7 +182,16 @@ class Lune : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         handleIntent(intent)
         val settingsManager = SettingsManager.getInstance(this)
-        enableEdgeToEdge()
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.auto(
+                android.graphics.Color.TRANSPARENT,
+                android.graphics.Color.TRANSPARENT
+            ),
+            navigationBarStyle = SystemBarStyle.auto(
+                android.graphics.Color.TRANSPARENT,
+                android.graphics.Color.TRANSPARENT
+            )
+        )
         setContent {
             val context = LocalContext.current
             val settingsManager = SettingsManager.getInstance(context)
@@ -519,6 +529,13 @@ fun MainScreen(
     onRequestAudioPermission: () -> Unit
 ) {
     val context = LocalContext.current
+    val bottomInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    val isButtonNavigation = bottomInset > 24.dp
+    val bottomPadding = if (currentSong != null) {
+        if (isButtonNavigation) bottomInset + 88.dp else 80.dp
+    } else {
+        0.dp
+    }
     val sTabResume = stringResource(R.string.tab_resume)
     val sTabAll = stringResource(R.string.tab_all)
     val sTabFavorites = stringResource(R.string.tab_favorites)
@@ -733,7 +750,10 @@ fun MainScreen(
                     }
                 }
             },
-            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+            modifier = Modifier
+                .fillMaxSize()
+                .nestedScroll(scrollBehavior.nestedScrollConnection),
+            containerColor = MaterialTheme.colorScheme.surface,
             topBar = {
                 LargeTopAppBar(
                     title = { 
@@ -823,7 +843,7 @@ fun MainScreen(
                 )
             }
         ) { innerPadding ->
-            Column(modifier = Modifier.padding(innerPadding)) {
+            Column(modifier = Modifier.padding(top = innerPadding.calculateTopPadding())) {
 
                 if (rawAllSongs.isNotEmpty()) {
                     // Search Bar
@@ -936,7 +956,6 @@ fun MainScreen(
                     }
                 }
 
-                val bottomPadding = if (currentSong != null) 80.dp else 0.dp
 
                 val tabAlbumsText = stringResource(R.string.tab_albums)
                 val playlistsText = stringResource(R.string.playlists)
@@ -1191,7 +1210,7 @@ fun MainScreen(
                     },
                     onSortClick = { showSortSheet = true },
                     currentlyPlayingId = if (playbackManager.activePlaylistId == playListRender.id) currentSong?.id else null,
-                    bottomPadding = if (currentSong != null) 80.dp else 0.dp,
+                    bottomPadding = bottomPadding,
                     viewModel = musicViewModel
                 )
             }
@@ -1224,9 +1243,15 @@ fun MainScreen(
                     },
                     onSortClick = { showSortSheet = true },
                     currentlyPlayingId = if (playbackManager.activePlaylistId == albumRender.id) currentSong?.id else null,
-                    bottomPadding = if (currentSong != null) 80.dp else 0.dp
+                    bottomPadding = bottomPadding
                 )
             }
+        }
+
+        val miniPlayerShape = if (isButtonNavigation) {
+            RoundedCornerShape(20.dp)
+        } else {
+            RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
         }
 
         // Mini Player
@@ -1236,7 +1261,16 @@ fun MainScreen(
             exit = slideOutVertically(targetOffsetY = { it }),
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
+                .then(
+                    if (isButtonNavigation) {
+                        Modifier
+                            .padding(horizontal = 16.dp)
+                            .padding(bottom = bottomInset + 8.dp)
+                    } else {
+                        Modifier
+                    }
+                )
+                .clip(miniPlayerShape)
         ) {
             val song = currentSong
             if (song != null) {
@@ -1254,6 +1288,7 @@ fun MainScreen(
                     isControlsFilled = isControlsFilled,
                     useCustomControlsColor = useCustomControlsColor,
                     controlsColorPalette = controlsColorPalette,
+                    shape = miniPlayerShape,
                     onTogglePlay = { 
                         if (settingsManager.isHapticVibrationEnabled) {
                             vibrator.triggerLightVibration()
@@ -3535,6 +3570,7 @@ fun MiniPlayer(
     isControlsFilled: Boolean,
     useCustomControlsColor: Boolean,
     controlsColorPalette: Int,
+    shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
     onTogglePlay: () -> Unit,
     onExpand: () -> Unit,
     onPrevious: () -> Unit,
@@ -3556,6 +3592,7 @@ fun MiniPlayer(
             .fillMaxWidth()
             .height(80.dp)
             .clickable { onExpand() },
+        shape = shape,
         color = MaterialTheme.colorScheme.primaryContainer,
         tonalElevation = 8.dp
     ) {
