@@ -50,6 +50,10 @@ class SettingsManager(context: Context) {
         get() = prefs.getString("sort_option", "ALPHABETICAL") ?: "ALPHABETICAL"
         set(value) = prefs.edit().putString("sort_option", value).apply()
 
+    var albumViewStyle: Int
+        get() = prefs.getInt("album_view_style", 0) // 0 = Grid, 1 = Carousel
+        set(value) = prefs.edit().putInt("album_view_style", value).apply()
+
     var isSortAscending: Boolean
         get() = prefs.getBoolean("is_sort_ascending", true)
         set(value) = prefs.edit().putBoolean("is_sort_ascending", value).apply()

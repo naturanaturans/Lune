@@ -59,6 +59,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.pager.VerticalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -97,6 +99,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.zIndex
 import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
 import androidx.compose.material.icons.automirrored.filled.PlaylistAddCheck
 import androidx.compose.material.icons.automirrored.filled.VolumeOff
@@ -997,12 +1000,37 @@ fun MainScreen(
                             )
                         }
                         "ALBUM_GRID" -> {
-                            AlbumGrid(
-                                albums = albums,
-                                onAlbumClick = { selectedAlbum = it },
-                                bottomPadding = bottomPadding,
-                                activePlaylistId = if (playbackManager.activeCategory == sTabAlbums) playbackManager.activePlaylistId else null
-                            )
+                            var viewStyle by remember { mutableIntStateOf(settingsManager.albumViewStyle) }
+                            
+                            Column(modifier = Modifier.fillMaxSize()) {
+                                AlbumsListHeader(
+                                    albumCount = albums.size,
+                                    viewStyle = viewStyle,
+                                    onToggleViewStyle = {
+                                        val newStyle = if (viewStyle == 0) 1 else 0
+                                        viewStyle = newStyle
+                                        settingsManager.albumViewStyle = newStyle
+                                    }
+                                )
+                                
+                                Box(modifier = Modifier.weight(1f)) {
+                                    if (viewStyle == 0) {
+                                        AlbumGrid(
+                                            albums = albums,
+                                            onAlbumClick = { selectedAlbum = it },
+                                            bottomPadding = bottomPadding,
+                                            activePlaylistId = currentSong?.artist?.hashCode()?.toLong()
+                                        )
+                                    } else {
+                                        AlbumStackedCarousel(
+                                            albums = albums,
+                                            onAlbumClick = { selectedAlbum = it },
+                                            bottomPadding = bottomPadding,
+                                            activePlaylistId = currentSong?.artist?.hashCode()?.toLong()
+                                        )
+                                    }
+                                }
+                            }
                         }
                         "PLAYLIST_GRID" -> {
                             PlaylistListScreen(
@@ -1819,6 +1847,203 @@ fun SongOptionsBottomSheet(
                 )
             }
             Spacer(modifier = Modifier.height(24.dp))
+        }
+    }
+}
+
+@Composable
+fun AlbumsListHeader(
+    albumCount: Int,
+    viewStyle: Int,
+    onToggleViewStyle: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 32.dp, vertical = 20.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Left side: Info (Total albums)
+        Column(horizontalAlignment = Alignment.Start) {
+            Text(
+                text = albumCount.toString(),
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Default.Album,
+                    contentDescription = null,
+                    modifier = Modifier.size(14.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = stringResource(R.string.tab_albums), // Display "Artists" text per user request
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        // Right side: Controls (Toggle View)
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+
+            Surface(
+                onClick = onToggleViewStyle,
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                modifier = Modifier.size(40.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        if (viewStyle == 0) Icons.Default.ViewCarousel else Icons.Default.GridView,
+                        contentDescription = "Toggle View Style",
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
+@Composable
+fun AlbumStackedCarousel(
+    albums: List<Album>,
+    onAlbumClick: (Album) -> Unit,
+    bottomPadding: Dp,
+    activePlaylistId: Long? = null
+) {
+    val initialPage = remember(activePlaylistId, albums) {
+        if (activePlaylistId != null) {
+            val idx = albums.indexOfFirst { it.id == activePlaylistId }
+            if (idx >= 0) idx else 0
+        } else 0
+    }
+    val pagerState = rememberPagerState(pageCount = { albums.size })
+    
+    LaunchedEffect(activePlaylistId) {
+        if (initialPage > 0) {
+            pagerState.scrollToPage(initialPage)
+        }
+    }
+    
+    VerticalPager(
+        state = pagerState,
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(top = 32.dp, bottom = bottomPadding + 32.dp),
+        pageSpacing = (-240).dp // Overlap pages significantly to create the stacked card effect
+    ) { page ->
+        val album = albums[page]
+        val pageOffset = (pagerState.currentPage - page) + pagerState.currentPageOffsetFraction
+        val absPageOffset = kotlin.math.abs(pageOffset)
+        
+        val scale = 1f - (absPageOffset * 0.1f).coerceIn(0f, 0.4f)
+        val alpha = if (pageOffset > 3f || pageOffset < -1f) 0f else (1f - (absPageOffset * 0.3f)).coerceIn(0f, 1f)
+        val translationY = if (pageOffset > 0) {
+            (pageOffset * 60.dp.value)
+        } else {
+            -(pageOffset * 300.dp.value)
+        }
+        
+        val zIndex = 100f - absPageOffset
+        val isPlaying = album.id == activePlaylistId
+        
+        Box(
+            modifier = Modifier
+                .graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                    this.alpha = alpha
+                    this.translationY = translationY
+                    this.shadowElevation = if (pageOffset == 0f) 16f else 4f
+                }
+                .zIndex(zIndex)
+                .fillMaxWidth(0.75f)
+                .aspectRatio(0.85f) // Taller than wide, like a card
+                .clickable { onAlbumClick(album) },
+            contentAlignment = Alignment.Center
+        ) {
+            Surface(
+                shape = RoundedCornerShape(24.dp),
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Box {
+                    AsyncImage(
+                        model = album.coverUrl ?: album.albumArtUri ?: com.demonlab.lune.R.drawable.ic_launcher_foreground,
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                    
+                    // Overlay album name in a pill at the top
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 16.dp),
+                        contentAlignment = Alignment.TopCenter
+                    ) {
+                        Surface(
+                            shape = CircleShape,
+                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        ) {
+                            Text(
+                                text = album.name,
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                            )
+                        }
+                    }
+                    
+                    if (isPlaying) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = 0.4f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                Icons.Default.PlayArrow,
+                                contentDescription = null,
+                                modifier = Modifier.size(64.dp),
+                                tint = Color.White
+                            )
+                        }
+                    }
+                    
+                    // Overlay artist name ONLY, at the bottom of the card
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(
+                                Brush.verticalGradient(
+                                    colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.8f))
+                                )
+                            ),
+                        contentAlignment = Alignment.BottomCenter
+                    ) {
+                        Text(
+                            text = album.artist,
+                            color = Color.White,
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -3901,7 +4126,22 @@ fun AlbumGrid(
     bottomPadding: Dp,
     activePlaylistId: Long? = null
 ) {
+    val initialIndex = remember(activePlaylistId, albums) {
+        if (activePlaylistId != null) {
+            val idx = albums.indexOfFirst { it.id == activePlaylistId }
+            if (idx >= 0) idx else 0
+        } else 0
+    }
+    val gridState = androidx.compose.foundation.lazy.grid.rememberLazyGridState()
+
+    LaunchedEffect(activePlaylistId) {
+        if (initialIndex > 0) {
+            gridState.scrollToItem(initialIndex)
+        }
+    }
+
     LazyVerticalGrid(
+        state = gridState,
         columns = GridCells.Fixed(2),
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = bottomPadding + 16.dp),
