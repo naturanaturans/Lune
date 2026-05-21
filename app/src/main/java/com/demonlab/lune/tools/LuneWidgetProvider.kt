@@ -7,13 +7,13 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.graphics.*
-import android.os.Build
 import android.widget.RemoteViews
 import android.media.AudioManager
 import android.media.AudioDeviceInfo
-import android.renderscript.*
 import com.demonlab.lune.R
 import com.demonlab.lune.ui.activities.Lune
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.scale
 
 class LuneWidgetProvider : AppWidgetProvider() {
 
@@ -25,7 +25,6 @@ class LuneWidgetProvider : AppWidgetProvider() {
 
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
-        // Handle specific updates if needed
         if (intent.action == "com.demonlab.lune.WIDGET_UPDATE") {
             val appWidgetManager = AppWidgetManager.getInstance(context)
             val componentName = ComponentName(context, LuneWidgetProvider::class.java)
@@ -39,10 +38,9 @@ class LuneWidgetProvider : AppWidgetProvider() {
             val playbackManager = PlaybackManager.getInstance(context)
             val currentSong = playbackManager.currentSong
             val isPlaying = playbackManager.isPlaying
-            
+
             val views = RemoteViews(context.packageName, R.layout.lune_widget_layout)
 
-            // Open App on click
             val openAppIntent = Intent(context, Lune::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
             }
@@ -52,16 +50,13 @@ class LuneWidgetProvider : AppWidgetProvider() {
             if (currentSong != null) {
                 views.setTextViewText(R.id.widget_title, currentSong.title)
                 views.setTextViewText(R.id.widget_artist, currentSong.artist)
-                
-                // Update Progress
+
                 val progress = (playbackManager.getProgress() * 100).toInt()
                 views.setProgressBar(R.id.widget_progress, 100, progress, false)
-                
-                // Set Play/Pause Icon
-                views.setImageViewResource(R.id.widget_play_pause, 
+
+                views.setImageViewResource(R.id.widget_play_pause,
                     if (isPlaying) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play)
-                
-                // Audio Output
+
                 views.setImageViewResource(R.id.widget_output_icon, getOutputIconRes(context))
                 views.setTextViewText(R.id.widget_output_text, getOutputName(context))
             } else {
@@ -72,8 +67,7 @@ class LuneWidgetProvider : AppWidgetProvider() {
                 views.setViewVisibility(R.id.widget_dark_overlay, android.view.View.GONE)
             }
 
-            // Button Intents
-            views.setOnClickPendingIntent(R.id.widget_play_pause, getServicePendingIntent(context, 
+            views.setOnClickPendingIntent(R.id.widget_play_pause, getServicePendingIntent(context,
                 if (isPlaying) MusicService.ACTION_PAUSE else MusicService.ACTION_PLAY))
             views.setOnClickPendingIntent(R.id.widget_prev, getServicePendingIntent(context, MusicService.ACTION_PREVIOUS))
             views.setOnClickPendingIntent(R.id.widget_next, getServicePendingIntent(context, MusicService.ACTION_NEXT))
@@ -90,13 +84,12 @@ class LuneWidgetProvider : AppWidgetProvider() {
 
         private fun getOutputIconRes(context: Context): Int {
             val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                val devices = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
-                for (device in devices) {
-                    when (device.type) {
-                        AudioDeviceInfo.TYPE_BLUETOOTH_A2DP, AudioDeviceInfo.TYPE_BLUETOOTH_SCO -> return R.drawable.ic_bluetooth
-                        AudioDeviceInfo.TYPE_WIRED_HEADPHONES, AudioDeviceInfo.TYPE_WIRED_HEADSET, AudioDeviceInfo.TYPE_USB_HEADSET -> return R.drawable.ic_headphones
-                    }
+            val devices = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
+            for (device in devices) {
+                when (device.type) {
+                    AudioDeviceInfo.TYPE_BLUETOOTH_A2DP, AudioDeviceInfo.TYPE_BLUETOOTH_SCO -> return R.drawable.ic_bluetooth
+                    AudioDeviceInfo.TYPE_WIRED_HEADPHONES, AudioDeviceInfo.TYPE_WIRED_HEADSET, AudioDeviceInfo.TYPE_USB_HEADSET -> return R.drawable.ic_headphones
+                    else -> { /* Catch-all fallback block to suppress compiler warnings on unhandled constants */ }
                 }
             }
             return R.drawable.ic_speaker
@@ -104,26 +97,24 @@ class LuneWidgetProvider : AppWidgetProvider() {
 
         private fun getOutputName(context: Context): String {
             val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                val devices = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
-                for (device in devices) {
-                    when (device.type) {
-                        AudioDeviceInfo.TYPE_BLUETOOTH_A2DP, AudioDeviceInfo.TYPE_BLUETOOTH_SCO -> return context.getString(R.string.output_bluetooth)
-                        AudioDeviceInfo.TYPE_WIRED_HEADPHONES, AudioDeviceInfo.TYPE_WIRED_HEADSET, AudioDeviceInfo.TYPE_USB_HEADSET -> return context.getString(R.string.output_headphones)
-                    }
+            val devices = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
+            for (device in devices) {
+                when (device.type) {
+                    AudioDeviceInfo.TYPE_BLUETOOTH_A2DP, AudioDeviceInfo.TYPE_BLUETOOTH_SCO -> return context.getString(R.string.output_bluetooth)
+                    AudioDeviceInfo.TYPE_WIRED_HEADPHONES, AudioDeviceInfo.TYPE_WIRED_HEADSET, AudioDeviceInfo.TYPE_USB_HEADSET -> return context.getString(R.string.output_headphones)
+                    else -> { /* Catch-all fallback block to suppress compiler warnings on unhandled constants */ }
                 }
             }
             return context.getString(R.string.output_speaker)
         }
 
         fun getRoundedCornerBitmap(bitmap: Bitmap, pixels: Int): Bitmap {
-            val output = Bitmap.createBitmap(bitmap.width, bitmap.height, Bitmap.Config.ARGB_8888)
+            val output = createBitmap(bitmap.width, bitmap.height)
             val canvas = Canvas(output)
-            val paint = Paint()
+            val paint = Paint().apply { isAntiAlias = true }
             val rect = Rect(0, 0, bitmap.width, bitmap.height)
             val rectF = RectF(rect)
             val roundPx = pixels.toFloat()
-            paint.isAntiAlias = true
             canvas.drawARGB(0, 0, 0, 0)
             paint.color = -0xbdbdbe
             canvas.drawRoundRect(rectF, roundPx, roundPx, paint)
@@ -132,26 +123,30 @@ class LuneWidgetProvider : AppWidgetProvider() {
             return output
         }
 
+        @Suppress("UNUSED_PARAMETER")
         fun getBlurredBitmap(context: Context, bitmap: Bitmap, radius: Int, cornerRadius: Int): Bitmap {
             return try {
-                // Create a copy for blurring (RS needs a mutable bitmap or a source)
-                val input = if (bitmap.config == Bitmap.Config.ARGB_8888) bitmap else bitmap.copy(Bitmap.Config.ARGB_8888, true)
-                val output = Bitmap.createBitmap(input.width, input.height, Bitmap.Config.ARGB_8888)
-                
-                val rs = RenderScript.create(context)
-                val blurScript = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs))
-                val allIn = Allocation.createFromBitmap(rs, input)
-                val allOut = Allocation.createFromBitmap(rs, output)
-                
-                blurScript.setRadius(25f) // High radius for deep defocus
-                blurScript.setInput(allIn)
-                blurScript.forEach(allOut)
-                allOut.copyTo(output)
-                
-                rs.destroy()
+                // Use radius to dynamically calculate the scale-down size (higher radius = blurrier)
+                val scaleFactor = radius.coerceIn(4, 50)
+                val tinyWidth = (bitmap.width / scaleFactor).coerceAtLeast(8)
+                val tinyHeight = (bitmap.height / scaleFactor).coerceAtLeast(8)
+
+                // Step 1: Scale down with bilinear filtering
+                val tinyBitmap = bitmap.scale(tinyWidth, tinyHeight)
+
+                // Step 2: Draw tiny bitmap back full-size. GPU bilinear scaling triggers smooth blur.
+                val output = createBitmap(bitmap.width, bitmap.height)
+                val canvas = Canvas(output)
+                val paint = Paint().apply {
+                    isAntiAlias = true
+                    isFilterBitmap = true
+                }
+
+                canvas.drawBitmap(tinyBitmap, null, Rect(0, 0, bitmap.width, bitmap.height), paint)
+                tinyBitmap.recycle() // Free memory immediately
+
                 getRoundedCornerBitmap(output, cornerRadius)
-            } catch (e: Exception) {
-                // Fallback to simple rounded bitmap if RS fails
+            } catch (_: Exception) {
                 getRoundedCornerBitmap(bitmap, cornerRadius)
             }
         }

@@ -1,22 +1,22 @@
 package com.demonlab.lune.tools
 
-import com.demonlab.lune.tools.Song
-
+import android.Manifest
 import android.content.ContentUris
 import android.content.Context
-import android.provider.MediaStore
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
+import android.provider.MediaStore
+import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import com.demonlab.lune.data.MusicDatabase
-import com.demonlab.lune.data.SongOverride
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.TypeAdapter
 import com.google.gson.reflect.TypeToken
 import com.google.gson.stream.JsonReader
+import com.google.gson.stream.JsonToken
 import com.google.gson.stream.JsonWriter
-import android.Manifest
-import android.content.pm.PackageManager
-import androidx.core.content.ContextCompat
 import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -30,19 +30,19 @@ class UriTypeAdapter : TypeAdapter<Uri>() {
         }
     }
 
-    override fun read(inReader: JsonReader): Uri? {
-        if (inReader.peek() == com.google.gson.stream.JsonToken.NULL) {
-            inReader.nextNull()
+    override fun read(reader: JsonReader): Uri? {
+        if (reader.peek() == JsonToken.NULL) {
+            reader.nextNull()
             return null
         }
-        return Uri.parse(inReader.nextString())
+        return reader.nextString().toUri() // Modern KTX string-to-Uri converter
     }
 }
 
 class MusicProvider(private val context: Context) {
     private val settingsManager = SettingsManager.getInstance(context)
     private val database = MusicDatabase.getDatabase(context)
-    
+
     private val cacheFile = File(context.filesDir, "songs_cache.json")
     private val gson: Gson = GsonBuilder()
         .registerTypeAdapter(Uri::class.java, UriTypeAdapter())
@@ -61,12 +61,6 @@ class MusicProvider(private val context: Context) {
     }
 
     private fun saveToCache(songs: List<Song>) {
-        if (songs.isEmpty()) {
-            // Don't overwrite with empty if we suspect it might be a sync error
-            // However, if it's a legitimate empty list (e.g. user deleted everything), we might want to save.
-            // For now, let's just log and save anyway, but ViewModel will handle the UI side.
-            // Actually, let's only save if we know we had permissions.
-        }
         try {
             val json = gson.toJson(songs)
             cacheFile.writeText(json)
@@ -76,7 +70,7 @@ class MusicProvider(private val context: Context) {
     }
 
     private fun hasReadPermission(): Boolean {
-        val permission = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+        val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             Manifest.permission.READ_MEDIA_AUDIO
         } else {
             Manifest.permission.READ_EXTERNAL_STORAGE
@@ -86,9 +80,9 @@ class MusicProvider(private val context: Context) {
 
     suspend fun syncSongs(): List<Song> = withContext(Dispatchers.IO) {
         if (!hasReadPermission()) return@withContext emptyList()
-        val showWhatsapp = settingsManager.showWhatsappAudio
         val songList = mutableListOf<Song>()
-        val collection = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+
+        val collection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
         } else {
             MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
@@ -103,10 +97,10 @@ class MusicProvider(private val context: Context) {
             MediaStore.Audio.Media.ALBUM_ID,
             MediaStore.Audio.Media.DATA,
             MediaStore.Audio.Media.DATE_ADDED,
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 MediaStore.Audio.Media.GENRE
             } else {
-                MediaStore.Audio.Media.ARTIST // Fallback if genre not easily available
+                MediaStore.Audio.Media.ARTIST // Safe fallback mapping
             }
         )
 
@@ -130,7 +124,7 @@ class MusicProvider(private val context: Context) {
             val albumIdColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID)
             val dataColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
             val dateAddedColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED)
-            val genreColumn = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            val genreColumn = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 cursor.getColumnIndex(MediaStore.Audio.Media.GENRE)
             } else -1
 
@@ -148,7 +142,7 @@ class MusicProvider(private val context: Context) {
                 val override = overrides[id]
                 var coverUrl: String? = null
                 var isFavorite = false
-                
+
                 if (override != null) {
                     override.title?.let { if (it.isNotBlank()) title = it }
                     override.artist?.let { if (it.isNotBlank()) artist = it }
@@ -163,21 +157,23 @@ class MusicProvider(private val context: Context) {
                 val isHiFiFile = extension == "flac" || extension == "wav" || extension == "alac"
                 val isHiFi = settingsManager.enableHiFi && isHiFiFile
 
-                val contentUri: Uri = ContentUris.withAppendedId(
-                    collection,
-                    id
-                )
-                
-                val albumArtUri = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                val contentUri: Uri = ContentUris.withAppendedId(collection, id)
+
+                val albumArtUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     contentUri
                 } else {
                     ContentUris.withAppendedId(
-                        Uri.parse("content://media/external/audio/albumart"),
+                        "content://media/external/audio/albumart".toUri(),
                         albumId
                     )
                 }
 
-                songList.add(Song(id, albumId, title, artist, album, duration, contentUri, data, dateAdded, albumArtUri, genre, folderName, isHiFi, coverUrl, isFavorite, null))
+                songList.add(
+                    Song(
+                        id, albumId, title, artist, album, duration, contentUri, data,
+                        dateAdded, albumArtUri, genre, folderName, isHiFi, coverUrl, isFavorite, null
+                    )
+                )
             }
         }
         saveToCache(songList)

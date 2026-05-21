@@ -7,9 +7,12 @@ import com.demonlab.lune.data.MusicDatabase
 import com.demonlab.lune.data.SongOverride
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import androidx.core.net.toUri
+import java.io.File
 
 class MetadataManager(private val context: Context) {
     private val database = MusicDatabase.getDatabase(context)
+    private val coversDir = File(context.filesDir, "covers")
 
     suspend fun updateSongMetadata(
         songId: Long,
@@ -19,13 +22,11 @@ class MetadataManager(private val context: Context) {
         genre: String?,
         coverUri: String?
     ): Boolean = withContext(Dispatchers.IO) {
-        return@withContext try {
-            var finalCoverUri = coverUri
-            if (coverUri != null && !coverUri.startsWith("file://${context.filesDir}")) {
-                val localUri = saveCustomCover(songId, Uri.parse(coverUri))
-                if (localUri != null) {
-                    finalCoverUri = localUri.toString()
-                }
+        try {
+            val finalCoverUri = if (coverUri != null && !coverUri.startsWith("file://${context.filesDir}")) {
+                saveCustomCover(songId, coverUri.toUri())?.toString() ?: coverUri
+            } else {
+                coverUri
             }
 
             val existing = database.songOverrideDao().getOverrideForSong(songId)
@@ -47,13 +48,12 @@ class MetadataManager(private val context: Context) {
     }
 
     suspend fun updateFavoriteStatus(songId: Long, isFavorite: Boolean): Boolean = withContext(Dispatchers.IO) {
-        return@withContext try {
+        try {
             val existing = database.songOverrideDao().getOverrideForSong(songId)
-            if (existing != null) {
-                database.songOverrideDao().insertOverride(existing.copy(isFavorite = isFavorite))
-            } else {
-                database.songOverrideDao().insertOverride(SongOverride(songId = songId, isFavorite = isFavorite))
-            }
+            val override = existing?.copy(isFavorite = isFavorite)
+                ?: SongOverride(songId = songId, isFavorite = isFavorite)
+
+            database.songOverrideDao().insertOverride(override)
             true
         } catch (e: Exception) {
             Log.e("MetadataManager", "Error updating favorite status", e)
@@ -62,15 +62,11 @@ class MetadataManager(private val context: Context) {
     }
 
     suspend fun clearMetadataOverride(songId: Long): Boolean = withContext(Dispatchers.IO) {
-        return@withContext try {
+        try {
             val existing = database.songOverrideDao().getOverrideForSong(songId)
             if (existing != null) {
                 // Delete custom cover if it exists
-                val coversDir = java.io.File(context.filesDir, "covers")
-                val coverFile = java.io.File(coversDir, "cover_$songId.jpg")
-                if (coverFile.exists()) {
-                    coverFile.delete()
-                }
+                File(coversDir, "cover_$songId.jpg").takeIf { it.exists() }?.delete()
 
                 // Keep only the songId and isFavorite status, clear other metadata
                 val clearedOverride = SongOverride(
@@ -88,13 +84,12 @@ class MetadataManager(private val context: Context) {
 
     private fun saveCustomCover(songId: Long, imageUri: Uri): Uri? {
         return try {
-            val coversDir = java.io.File(context.filesDir, "covers")
             if (!coversDir.exists()) {
                 coversDir.mkdirs()
             }
-            val coverFile = java.io.File(coversDir, "cover_$songId.jpg")
+            val coverFile = File(coversDir, "cover_$songId.jpg")
             context.contentResolver.openInputStream(imageUri)?.use { input ->
-                java.io.FileOutputStream(coverFile).use { output ->
+                coverFile.outputStream().use { output ->
                     input.copyTo(output)
                 }
             }
