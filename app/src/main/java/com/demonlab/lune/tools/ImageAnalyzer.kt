@@ -2,6 +2,7 @@ package com.demonlab.lune.tools
 
 import android.graphics.Bitmap
 import androidx.compose.ui.geometry.Offset
+import androidx.core.graphics.get // Required KTX import for 2D array operator
 
 object ImageAnalyzer {
     fun findFocalPoint(bitmap: Bitmap): Offset {
@@ -10,11 +11,11 @@ object ImageAnalyzer {
         val gridCount = 4
         val cellWidth = width / gridCount
         val cellHeight = height / gridCount
-        
+
         var maxContrast = -1f
         var bestCellX = gridCount / 2
         var bestCellY = gridCount / 2
-        
+
         for (gy in 0 until gridCount) {
             for (gx in 0 until gridCount) {
                 val contrast = calculateVariance(bitmap, gx * cellWidth, gy * cellHeight, cellWidth, cellHeight)
@@ -25,7 +26,7 @@ object ImageAnalyzer {
                 }
             }
         }
-        
+
         return Offset(
             (bestCellX + 0.5f) / gridCount,
             (bestCellY + 0.5f) / gridCount
@@ -36,12 +37,16 @@ object ImageAnalyzer {
         var sum = 0L
         var sumSq = 0L
         val n = w * h
-        
+
         if (n == 0) return 0f
 
-        for (i in x until (x + w).coerceAtMost(bitmap.width)) {
-            for (j in y until (y + h).coerceAtMost(bitmap.height)) {
-                val pixel = bitmap.getPixel(i, j)
+        // Optimize: Calculate loop bounds once outside the loops
+        val limitX = (x + w).coerceAtMost(bitmap.width)
+        val limitY = (y + h).coerceAtMost(bitmap.height)
+
+        for (i in x until limitX) {
+            for (j in y until limitY) {
+                val pixel = bitmap[i, j] // Modern AndroidX KTX 2D Array operator
                 val r = (pixel shr 16) and 0xFF
                 val g = (pixel shr 8) and 0xFF
                 val b = pixel and 0xFF
@@ -50,7 +55,7 @@ object ImageAnalyzer {
                 sumSq += (gray * gray).toLong()
             }
         }
-        
+
         return (sumSq.toFloat() / n) - (sum.toFloat() / n) * (sum.toFloat() / n)
     }
 }
