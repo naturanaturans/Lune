@@ -1,7 +1,6 @@
 import java.util.Properties
 import java.io.FileInputStream
 
-
 val keystorePropertiesFile = rootProject.file("keystore.properties")
 val keystoreProperties = Properties()
 
@@ -36,12 +35,20 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    signingConfigs {
-        create("release") {
-            storeFile = file(keystoreProperties["storeFile"] as String)
-            storePassword = keystoreProperties["storePassword"] as String
-            keyAlias = keystoreProperties["keyAlias"] as String
-            keyPassword = keystoreProperties["keyPassword"] as String
+    // =============================================
+    //      Only define the signing config if the
+    //      keystore.properties file actually exists.
+    //      This prevents a crash for contributors
+    //      who have not set up a release keystore.
+    // =============================================
+    if (keystorePropertiesFile.exists()) {
+        signingConfigs {
+            create("release") {
+                storeFile = file(keystoreProperties["storeFile"] as String)
+                storePassword = keystoreProperties["storePassword"] as String
+                keyAlias = keystoreProperties["keyAlias"] as String
+                keyPassword = keystoreProperties["keyPassword"] as String
+            }
         }
     }
 
@@ -52,6 +59,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // The signing config is also only applied when the file exists
             if (keystorePropertiesFile.exists()) {
                 signingConfig = signingConfigs.getByName("release")
             }
@@ -102,7 +110,7 @@ dependencies {
 
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("net.jthink:jaudiotagger:3.0.1")
-    
+
     // Room
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
@@ -120,11 +128,10 @@ androidComponents {
     onVariants { variant ->
         val variantName = variant.name
         val capitalizedName = variantName.replaceFirstChar { it.uppercase() }
-        
-        // Disable Art Profile tasks to ensure reproducible builds in F-Droid
-        tasks.matching { 
-            it.name == "compile${capitalizedName}ArtProfile" || 
-            it.name == "merge${capitalizedName}ArtProfile" 
+
+        tasks.matching {
+            it.name == "compile${capitalizedName}ArtProfile" ||
+                    it.name == "merge${capitalizedName}ArtProfile"
         }.configureEach {
             enabled = false
         }
