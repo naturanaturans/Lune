@@ -11,6 +11,9 @@
       <a href="https://ko-fi.com/mrdemonc">
         <img src="https://img.shields.io/badge/Ko--fi-Buy me a coffee-FF5E5B?style=for-the-badge&logo=kofi&logoColor=white"/>
       </a>
+      <a href="https://github.com/MrDemonc/Lune#-monero-xmr">
+        <img src="https://img.shields.io/badge/Monero-Donate-FF6600?style=for-the-badge&logo=monero&logoColor=white"/>
+      </a>
     </p>
     <p align="center">
       Lune is a minimalist and elegant music player for Android, designed with a focus on aesthetics and a premium user experience. 
