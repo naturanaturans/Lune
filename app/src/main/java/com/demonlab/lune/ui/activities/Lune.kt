@@ -2676,11 +2676,13 @@ fun FullPlayer(
     
     val isCinematic = settingsManager.isCinematicPlayerEnabled
     
-    DisposableEffect(isCinematic) {
+    val isLandscape = androidx.compose.ui.platform.LocalConfiguration.current.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+    
+    DisposableEffect(isCinematic, isLandscape) {
         val window = activity?.window
         if (window != null) {
             val controller = WindowCompat.getInsetsController(window, window.decorView)
-            if (isCinematic) {
+            if (isCinematic || isLandscape) {
                 controller.hide(WindowInsetsCompat.Type.statusBars())
                 controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             } else {
@@ -2688,7 +2690,7 @@ fun FullPlayer(
             }
         }
         onDispose {
-            if (isCinematic) {
+            if (isCinematic || isLandscape) {
                 val window = activity?.window
                 if (window != null) {
                     val controller = WindowCompat.getInsetsController(window, window.decorView)
@@ -2792,6 +2794,7 @@ fun FullPlayer(
         label = "SpinAnimation"
     )
 
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -2802,11 +2805,17 @@ fun FullPlayer(
             AsyncImage(
                 model = song.coverUrl ?: song.albumArtUri,
                 contentDescription = null,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(0.6f)
-                    .align(Alignment.TopCenter)
-                    .clipToBounds()
+                modifier = (if (isLandscape) {
+                    Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth(0.55f)
+                        .align(Alignment.CenterStart)
+                } else {
+                    Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(0.6f)
+                        .align(Alignment.TopCenter)
+                }).clipToBounds()
                     .graphicsLayer {
                         val baseScale = scale - 1f
                         val maxTransX = (size.width * baseScale) / 2f
@@ -2827,18 +2836,29 @@ fun FullPlayer(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(
-                        Brush.verticalGradient(
-                            0.00f to Color.Transparent,
-                            0.10f to Color.Transparent,
-                            0.25f to surf.copy(alpha = mAlpha * 0.2f),
-                            0.35f to surf.copy(alpha = mAlpha * 0.5f),
-                            0.42f to surf.copy(alpha = mAlpha * 0.85f),
-                            0.48f to surf.copy(alpha = mAlpha + (1f - mAlpha) * 0.4f),
-                            0.52f to surf.copy(alpha = mAlpha + (1f - mAlpha) * 0.75f),
-                            0.56f to surf.copy(alpha = mAlpha + (1f - mAlpha) * 0.9f),
-                            0.60f to surf,
-                            1.00f to surf
-                        )
+                        if (isLandscape) {
+                            Brush.horizontalGradient(
+                                0.00f to Color.Transparent,
+                                0.30f to Color.Transparent,
+                                0.45f to surf.copy(alpha = mAlpha * 0.3f),
+                                0.50f to surf.copy(alpha = mAlpha * 0.8f),
+                                0.55f to surf,
+                                1.00f to surf
+                            )
+                        } else {
+                            Brush.verticalGradient(
+                                0.00f to Color.Transparent,
+                                0.10f to Color.Transparent,
+                                0.25f to surf.copy(alpha = mAlpha * 0.2f),
+                                0.35f to surf.copy(alpha = mAlpha * 0.5f),
+                                0.42f to surf.copy(alpha = mAlpha * 0.85f),
+                                0.48f to surf.copy(alpha = mAlpha + (1f - mAlpha) * 0.4f),
+                                0.52f to surf.copy(alpha = mAlpha + (1f - mAlpha) * 0.75f),
+                                0.56f to surf.copy(alpha = mAlpha + (1f - mAlpha) * 0.9f),
+                                0.60f to surf,
+                                1.00f to surf
+                            )
+                        }
                     )
             )
         } else if (isDarkTheme) {
@@ -2854,63 +2874,7 @@ fun FullPlayer(
             )
         }
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .pointerInput(Unit) {
-                    var totalDragY = 0f
-                    var gestureConsumed = false
-                    detectDragGestures(
-                        onDragStart = {
-                            totalDragY = 0f
-                            gestureConsumed = false
-                        },
-                        onDrag = { _, dragAmount ->
-                            if (!gestureConsumed) {
-                                totalDragY += dragAmount.y
-                                val absY = kotlin.math.abs(totalDragY)
-                                val absX = kotlin.math.abs(dragAmount.x)
-                                // Vertical swipe processing
-                                if (absY > 60 && absY > absX * 1.5f) {
-                                    if (totalDragY > 0) {
-                                        // Swipe down → minimize
-                                        onMinimize()
-                                    } else {
-                                        // Swipe up
-                                        when (swipeUpAction) {
-                                            1 -> showQueueSheet = true
-                                            2 -> showEqSheet = true
-                                            3 -> showAddToPlaylistInPlayer = true
-                                            4 -> {
-                                                try {
-                                                    val file = java.io.File(song.path)
-                                                    if (file.exists()) {
-                                                        val contentUri = androidx.core.content.FileProvider.getUriForFile(
-                                                            context,
-                                                            "${context.packageName}.fileprovider",
-                                                            file
-                                                        )
-                                                        val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
-                                                            type = "audio/*"
-                                                            putExtra(android.content.Intent.EXTRA_STREAM, contentUri)
-                                                            addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                                        }
-                                                        context.startActivity(android.content.Intent.createChooser(shareIntent, context.getString(R.string.option_share)))
-                                                    }
-                                                } catch (e: Exception) {}
-                                            }
-                                        }
-                                    }
-                                    gestureConsumed = true
-                                }
-                            }
-                        }
-                    )
-                }
-                .padding(top = 48.dp, bottom = 24.dp, start = 24.dp, end = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
+        val coverSection: @Composable () -> Unit = {
             if (isCinematic) {
                 // Header Spacer
                 Spacer(modifier = Modifier.height(16.dp))
@@ -2975,9 +2939,9 @@ fun FullPlayer(
                     }
                 }
             }
+        }
 
-            val playbackManager = PlaybackManager.getInstance(LocalContext.current)
-            
+        val controlsSection: @Composable () -> Unit = {
             Row(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -3213,7 +3177,7 @@ fun FullPlayer(
                 }
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = if (isLandscape) Modifier.height(12.dp) else Modifier.width(16.dp))
 
             androidx.compose.animation.AnimatedContent(
                 targetState = Pair(showVolumeBar, showSpeedBar),
@@ -3407,14 +3371,99 @@ fun FullPlayer(
             }
         }
 
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .pointerInput(Unit) {
+                    var totalDragY = 0f
+                    var gestureConsumed = false
+                    detectDragGestures(
+                        onDragStart = {
+                            totalDragY = 0f
+                            gestureConsumed = false
+                        },
+                        onDrag = { _, dragAmount ->
+                            if (!gestureConsumed) {
+                                totalDragY += dragAmount.y
+                                val absY = kotlin.math.abs(totalDragY)
+                                val absX = kotlin.math.abs(dragAmount.x)
+                                // Vertical swipe processing
+                                if (absY > 60 && absY > absX * 1.5f) {
+                                    if (totalDragY > 0) {
+                                        // Swipe down → minimize
+                                        onMinimize()
+                                    } else {
+                                        // Swipe up
+                                        when (swipeUpAction) {
+                                            1 -> showQueueSheet = true
+                                            2 -> showEqSheet = true
+                                            3 -> showAddToPlaylistInPlayer = true
+                                            4 -> {
+                                                try {
+                                                    val file = java.io.File(song.path)
+                                                    if (file.exists()) {
+                                                        val contentUri = androidx.core.content.FileProvider.getUriForFile(
+                                                            context,
+                                                            "${context.packageName}.fileprovider",
+                                                            file
+                                                        )
+                                                        val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                                                            type = "audio/*"
+                                                            putExtra(android.content.Intent.EXTRA_STREAM, contentUri)
+                                                            addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                                        }
+                                                        context.startActivity(android.content.Intent.createChooser(shareIntent, context.getString(R.string.option_share)))
+                                                    }
+                                                } catch (e: Exception) {}
+                                            }
+                                        }
+                                    }
+                                    gestureConsumed = true
+                                }
+                            }
+                        }
+                    )
+                }
+        ) {
+            if (isLandscape) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = 24.dp, bottom = 24.dp, start = 48.dp, end = 48.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(modifier = Modifier.weight(1f).padding(end = 32.dp), contentAlignment = Alignment.Center) {
+                        coverSection()
+                    }
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        controlsSection()
+                    }
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = 48.dp, bottom = 24.dp, start = 24.dp, end = 24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+                    coverSection()
+                    controlsSection()
+                }
+            }
+        }
+
         if (showQueueSheet) {
             QueueBottomSheet(
                 playbackManager = playbackManager,
                 onDismiss = { showQueueSheet = false }
             )
         }
-
-
 
         if (showOptionsSheet) {
             PlayerOptionsBottomSheet(
@@ -3440,14 +3489,14 @@ fun FullPlayer(
         }
 
         if (showAddToPlaylistInPlayer) {
-            val currentSong = playbackManager.currentSong
-            if (currentSong != null) {
+            val currentSongState = playbackManager.currentSong
+            if (currentSongState != null) {
                 val musicViewModel: com.demonlab.lune.ui.viewmodels.MusicViewModel = viewModel()
                 LaunchedEffect(Unit) {
                     musicViewModel.loadPlaylists()
                 }
                 AddToPlaylistDialog(
-                    song = currentSong,
+                    song = currentSongState,
                     viewModel = musicViewModel,
                     playbackManager = playbackManager,
                     onDismiss = { 
