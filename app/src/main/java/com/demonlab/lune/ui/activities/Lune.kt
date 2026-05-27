@@ -549,16 +549,7 @@ fun MainScreen(
     val sTabFavorites = stringResource(R.string.tab_favorites)
     val sTabAlbums = stringResource(R.string.tab_albums)
     val sTabPlaylists = stringResource(R.string.playlists)
-    val sortedSongs = remember(filteredSongs, playbackManager.sortOption, playbackManager.isSortAscending) {
-        playbackManager.getSortedList(filteredSongs)
-    }
-    val contextId = remember(selectedFolder) {
-        when (selectedFolder) {
-            "RESUME", "ALL", "ALBUMS" -> -100L
-            "FAVORITES" -> -200L
-            else -> selectedFolder.hashCode().toLong()
-        }
-    }
+
     var editingSong by remember { mutableStateOf<Song?>(null) }
     var showEditSheet by remember { mutableStateOf(false) }
     var optionsSong by remember { mutableStateOf<Song?>(null) }
@@ -583,6 +574,37 @@ fun MainScreen(
     
     var showMenu by remember { mutableStateOf(false) }
     var selectedAlbum by remember { mutableStateOf<Album?>(null) }
+
+    val contextId = remember(selectedFolder) {
+        when (selectedFolder) {
+            "RESUME", "ALL", "ALBUMS" -> -100L
+            "FAVORITES" -> -200L
+            else -> selectedFolder.hashCode().toLong()
+        }
+    }
+    val currentSortKey = remember(selectedFolder, selectedPlaylist, selectedAlbum) {
+        when {
+            selectedPlaylist != null -> "playlist_${selectedPlaylist?.id}"
+            selectedAlbum != null -> "album_${selectedAlbum?.name}"
+            else -> "folder_$selectedFolder"
+        }
+    }
+    val activeContextId = remember(selectedFolder, selectedPlaylist, selectedAlbum) {
+        when {
+            selectedPlaylist != null -> selectedPlaylist?.id ?: -1L
+            selectedAlbum != null -> selectedAlbum?.id ?: -1L
+            else -> contextId
+        }
+    }
+    var activeSortOption by remember(currentSortKey) {
+        mutableStateOf(settingsManager.getSortOption(currentSortKey))
+    }
+    var activeIsSortAscending by remember(currentSortKey) {
+        mutableStateOf(settingsManager.getIsSortAscending(currentSortKey))
+    }
+    val sortedSongs = remember(filteredSongs, activeSortOption, activeIsSortAscending) {
+        playbackManager.getSortedList(filteredSongs, activeSortOption, activeIsSortAscending)
+    }
 
     
     val albums = remember(rawAllSongs, hiddenFolders.value) {
@@ -1104,7 +1126,7 @@ fun MainScreen(
                                                 isShuffleActive = isShuffleActive,
                                                 isCurrentListPlaying = isCurrentListPlaying,
                                                 isPlaying = isPlaying,
-                                                isSortActive = playbackManager.sortOption != "ALPHABETICAL" || !playbackManager.isSortAscending,
+                                                isSortActive = activeSortOption != "ALPHABETICAL" || !activeIsSortAscending,
                                                 onSortClick = { showSortSheet = true },
                                                 onPlayClick = {
                                                     if (settingsManager.isHapticVibrationEnabled) {
@@ -1179,7 +1201,7 @@ fun MainScreen(
                                     listState = mainListState,
                                     items = sortedSongs,
                                     headerItemCount = if (showSimplifiedHeader) 1 else 0,
-                                    itemKeyOrLetter = { if (playbackManager.sortOption == "ALPHABETICAL") it.title else "" },
+                                    itemKeyOrLetter = { if (activeSortOption == "ALPHABETICAL") it.title else "" },
                                     modifier = Modifier
                                         .align(Alignment.CenterEnd)
                                         .padding(bottom = bottomPadding)
@@ -1231,6 +1253,8 @@ fun MainScreen(
                 PlaylistDetailView(
                     playlist = playListRender,
                     songs = playlistSongs,
+                    sortOption = activeSortOption,
+                    isSortAscending = activeIsSortAscending,
                     onBack = { selectedPlaylist = null },
                     onSongClick = { song, sortedList ->
                         playbackManager.play(song, sortedList, playListRender.id, category = "PLAYLISTS")
@@ -1264,6 +1288,8 @@ fun MainScreen(
             lastAlbum?.let { albumRender ->
                 AlbumDetailView(
                     album = albumRender,
+                    sortOption = activeSortOption,
+                    isSortAscending = activeIsSortAscending,
                     onBack = { selectedAlbum = null },
                     onSongClick = { song, sortedList ->
                         playbackManager.play(song, sortedList, albumRender.id, category = "ALBUMS")
@@ -1492,7 +1518,17 @@ fun MainScreen(
 
     if (showSortSheet) {
         SortBottomSheet(
-            playbackManager = playbackManager,
+            sortOption = activeSortOption,
+            isSortAscending = activeIsSortAscending,
+            onSortSettingsChange = { option, ascending ->
+                activeSortOption = option
+                activeIsSortAscending = ascending
+                settingsManager.setSortOption(currentSortKey, option)
+                settingsManager.setIsSortAscending(currentSortKey, ascending)
+                if (playbackManager.activePlaylistId == activeContextId) {
+                    playbackManager.setSortSettings(option, ascending)
+                }
+            },
             onDismiss = { showSortSheet = false }
         )
     }
@@ -2250,7 +2286,9 @@ fun formatLongDuration(durationInMillis: Long): String {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SortBottomSheet(
-    playbackManager: PlaybackManager,
+    sortOption: String,
+    isSortAscending: Boolean,
+    onSortSettingsChange: (String, Boolean) -> Unit,
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -2282,7 +2320,7 @@ fun SortBottomSheet(
                 // Restore defaults circular button
                 IconButton(
                     onClick = {
-                        playbackManager.setSortSettings("ALPHABETICAL", true)
+                        onSortSettingsChange("ALPHABETICAL", true)
                     },
                     modifier = Modifier
                         .size(40.dp)
@@ -2303,7 +2341,7 @@ fun SortBottomSheet(
                     shape = CircleShape,
                     color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
                     onClick = {
-                        playbackManager.setSortSettings(playbackManager.sortOption, !playbackManager.isSortAscending)
+                        onSortSettingsChange(sortOption, !isSortAscending)
                     }
                 ) {
                     Row(
@@ -2311,19 +2349,19 @@ fun SortBottomSheet(
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                     ) {
                         Text(
-                            text = if (playbackManager.isSortAscending) stringResource(R.string.sort_ascending) else stringResource(R.string.sort_descending),
+                            text = if (isSortAscending) stringResource(R.string.sort_ascending) else stringResource(R.string.sort_descending),
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSecondaryContainer,
                             modifier = Modifier.padding(end = 8.dp)
                         )
                         Switch(
-                            checked = playbackManager.isSortAscending,
+                            checked = isSortAscending,
                             onCheckedChange = {
-                                playbackManager.setSortSettings(playbackManager.sortOption, it)
+                                onSortSettingsChange(sortOption, it)
                             },
                             thumbContent = {
                                 Icon(
-                                    imageVector = if (playbackManager.isSortAscending) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
+                                    imageVector = if (isSortAscending) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
                                     contentDescription = null,
                                     modifier = Modifier.size(SwitchDefaults.IconSize)
                                 )
@@ -2342,7 +2380,7 @@ fun SortBottomSheet(
             )
             
             options.forEachIndexed { index, (option, stringResId) ->
-                val isSelected = playbackManager.sortOption == option
+                val isSelected = sortOption == option
                 val shape = when (index) {
                     0 -> RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp, bottomStart = 4.dp, bottomEnd = 4.dp)
                     options.lastIndex -> RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp, bottomStart = 16.dp, bottomEnd = 16.dp)
@@ -2351,7 +2389,7 @@ fun SortBottomSheet(
                 
                 Surface(
                     onClick = {
-                        playbackManager.setSortSettings(option, playbackManager.isSortAscending)
+                        onSortSettingsChange(option, isSortAscending)
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -4869,6 +4907,8 @@ fun AddToPlaylistDialog(
 fun PlaylistDetailView(
     playlist: com.demonlab.lune.data.Playlist,
     songs: List<Song>,
+    sortOption: String,
+    isSortAscending: Boolean,
     onBack: () -> Unit,
     onSongClick: (Song, List<Song>) -> Unit,
     onOptionsClick: (Song) -> Unit,
@@ -4885,8 +4925,8 @@ fun PlaylistDetailView(
     var showAddSongsDialog by remember { mutableStateOf(false) }
     val isPlaying = playbackManager.isPlaying
     
-    val sortedSongs = remember(songs, playbackManager.sortOption, playbackManager.isSortAscending) {
-        playbackManager.getSortedList(songs)
+    val sortedSongs = remember(songs, sortOption, isSortAscending) {
+        playbackManager.getSortedList(songs, sortOption, isSortAscending)
     }
     
     // Calculate header visibility based on scroll
@@ -5217,7 +5257,7 @@ fun PlaylistDetailView(
             listState = listState,
             items = sortedSongs,
             headerItemCount = 1,
-            itemKeyOrLetter = { if (playbackManager.sortOption == "ALPHABETICAL") it.title else "" },
+            itemKeyOrLetter = { if (sortOption == "ALPHABETICAL") it.title else "" },
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .padding(bottom = bottomPadding)
@@ -5228,6 +5268,8 @@ fun PlaylistDetailView(
 @Composable
 fun AlbumDetailView(
     album: Album,
+    sortOption: String,
+    isSortAscending: Boolean,
     onBack: () -> Unit,
     onSongClick: (Song, List<Song>) -> Unit,
     onOptionsClick: (Song) -> Unit,
@@ -5241,8 +5283,8 @@ fun AlbumDetailView(
     val vibrator = context.getSystemService(android.content.Context.VIBRATOR_SERVICE) as android.os.Vibrator
     val listState = rememberLazyListState()
     val isPlaying = playbackManager.isPlaying
-    val sortedSongs = remember(album.songs, playbackManager.sortOption, playbackManager.isSortAscending) {
-        playbackManager.getSortedList(album.songs)
+    val sortedSongs = remember(album.songs, sortOption, isSortAscending) {
+        playbackManager.getSortedList(album.songs, sortOption, isSortAscending)
     }
     
     // Calculate header visibility based on scroll
@@ -5520,7 +5562,7 @@ fun AlbumDetailView(
             listState = listState,
             items = sortedSongs,
             headerItemCount = 1,
-            itemKeyOrLetter = { if (playbackManager.sortOption == "ALPHABETICAL") it.title else "" },
+            itemKeyOrLetter = { if (sortOption == "ALPHABETICAL") it.title else "" },
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .padding(bottom = bottomPadding)

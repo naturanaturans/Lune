@@ -50,6 +50,14 @@ class SettingsManager(context: Context) {
         get() = prefs.getString("sort_option", "ALPHABETICAL") ?: "ALPHABETICAL"
         set(value) = prefs.edit().putString("sort_option", value).apply()
 
+    fun getSortOption(key: String): String {
+        return prefs.getString("sort_option_$key", sortOption) ?: sortOption
+    }
+
+    fun setSortOption(key: String, option: String) {
+        prefs.edit().putString("sort_option_$key", option).apply()
+    }
+
     var albumViewStyle: Int
         get() = prefs.getInt("album_view_style", 0) // 0 = Grid, 1 = Carousel
         set(value) = prefs.edit().putInt("album_view_style", value).apply()
@@ -57,6 +65,14 @@ class SettingsManager(context: Context) {
     var isSortAscending: Boolean
         get() = prefs.getBoolean("is_sort_ascending", true)
         set(value) = prefs.edit().putBoolean("is_sort_ascending", value).apply()
+
+    fun getIsSortAscending(key: String): Boolean {
+        return prefs.getBoolean("is_sort_ascending_$key", isSortAscending)
+    }
+
+    fun setIsSortAscending(key: String, ascending: Boolean) {
+        prefs.edit().putBoolean("is_sort_ascending_$key", ascending).apply()
+    }
 
     var isShuffle: Boolean
         get() = prefs.getBoolean("is_shuffle", false)

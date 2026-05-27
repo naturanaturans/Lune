@@ -645,8 +645,8 @@ class PlaybackManager private constructor(private val context: Context) {
         }
     }
 
-    fun getSortedList(list: List<Song>): List<Song> {
-        val comparator = when (sortOption) {
+    fun getSortedList(list: List<Song>, option: String = sortOption, ascending: Boolean = isSortAscending): List<Song> {
+        val comparator = when (option) {
             "ALPHABETICAL" -> compareBy<Song> { it.title.lowercase(java.util.Locale.getDefault()) }
             "ARTIST" -> compareBy<Song> { it.artist.lowercase(java.util.Locale.getDefault()) }
             "DURATION" -> compareBy<Song> { it.duration }
@@ -654,7 +654,7 @@ class PlaybackManager private constructor(private val context: Context) {
             else -> compareBy<Song> { it.title.lowercase(java.util.Locale.getDefault()) }
         }
         
-        return if (isSortAscending) {
+        return if (ascending) {
             list.sortedWith(comparator)
         } else {
             list.sortedWith(comparator.reversed())
