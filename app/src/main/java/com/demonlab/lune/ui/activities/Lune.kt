@@ -161,8 +161,6 @@ import com.demonlab.lune.ui.theme.LuneTheme
 import com.demonlab.lune.ui.screens.OnboardingScreen
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
-import com.demonlab.lune.tools.ImageAnalyzer
-import android.graphics.drawable.BitmapDrawable
 import coil.imageLoader
 import coil.request.ImageRequest
 
@@ -2762,47 +2760,32 @@ fun FullPlayer(
 
     val infiniteTransition = rememberInfiniteTransition(label = "CoverAnimation")
     val scale by infiniteTransition.animateFloat(
-        initialValue = 1.2f,
-        targetValue = 1.45f,
+        initialValue = 1.1f,
+        targetValue = 1.3f,
         animationSpec = infiniteRepeatable(
-            animation = tween(18000, easing = LinearOutSlowInEasing),
+            animation = tween(24000, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "Scale"
     )
-    val offsetX by infiniteTransition.animateFloat(
-        initialValue = -150f,
-        targetValue = 150f,
+    val orbitX by infiniteTransition.animateFloat(
+        initialValue = -0.05f,
+        targetValue = 0.05f,
         animationSpec = infiniteRepeatable(
-            animation = tween(23000, easing = LinearEasing),
+            animation = tween(23000, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "OffsetX"
+        label = "OrbitX"
     )
-    val offsetY by infiniteTransition.animateFloat(
-        initialValue = -120f,
-        targetValue = 120f,
+    val orbitY by infiniteTransition.animateFloat(
+        initialValue = -0.04f,
+        targetValue = 0.04f,
         animationSpec = infiniteRepeatable(
-            animation = tween(29000, easing = LinearEasing),
+            animation = tween(29000, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "OffsetY"
+        label = "OrbitY"
     )
-
-    var focalPoint by remember { mutableStateOf(Offset(0.5f, 0.5f)) }
-    
-    LaunchedEffect(song.id) {
-        val loader = context.imageLoader
-        val request = ImageRequest.Builder(context)
-            .data(song.coverUrl ?: song.albumArtUri)
-            .size(100, 100)
-            .allowHardware(false)
-            .build()
-        val result = loader.execute(request)
-        (result.drawable as? BitmapDrawable)?.bitmap?.let { bitmap ->
-            focalPoint = ImageAnalyzer.findFocalPoint(bitmap)
-        }
-    }
 
     val isSystemDark = isSystemInDarkTheme()
     val isDarkTheme = when (settingsManager.themeMode) {
@@ -2865,13 +2848,9 @@ fun FullPlayer(
         if (isCinematic) {
             val cinematicTransform: @Composable (Modifier) -> Modifier = { mod ->
                 mod.clipToBounds().graphicsLayer {
-                    val baseScale = scale - 1f
-                    val maxTransX = (size.width * baseScale) / 2f
-                    val maxTransY = (size.height * baseScale) / 2f
-                    val targetTransX = (0.5f - focalPoint.x) * size.width * baseScale + (offsetX * baseScale)
-                    val targetTransY = (0.5f - focalPoint.y) * size.height * baseScale + (offsetY * baseScale)
-                    translationX = targetTransX.coerceIn(-maxTransX, maxTransX)
-                    translationY = targetTransY.coerceIn(-maxTransY, maxTransY)
+                    val dim = size.width.coerceAtMost(size.height)
+                    translationX = orbitX * dim
+                    translationY = orbitY * dim
                     scaleX = scale
                     scaleY = scale
                 }
