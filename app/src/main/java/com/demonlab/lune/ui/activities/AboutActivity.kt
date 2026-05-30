@@ -466,8 +466,11 @@ fun DonateDialog(onDismiss: () -> Unit) {
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.close))
+            FilledTonalButton(
+                onClick = onDismiss,
+                shape = CircleShape
+            ) {
+                Text(stringResource(R.string.cancel), fontWeight = FontWeight.Bold)
             }
         }
     )

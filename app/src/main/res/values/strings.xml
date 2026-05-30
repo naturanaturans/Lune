@@ -55,7 +55,6 @@
     <string name="option_automix">Automix</string>
     <string name="option_timer">Timer</string>
     <string name="option_lyrics">Lyrics</string>
-    <string name="refresh_library">Refresh library</string>
     <string name="transition_mixing">Mixing</string>
     <string name="transition_crossfade">Crossfade</string>
     <string name="unknown_artist">Unknown Artist</string>
@@ -309,5 +308,4 @@
     <string name="monero">Monero</string>
     <string name="monero_address">88s5Re4p6a3P9TtqaG1G2Yeq5Ppp1w1npXebyLjktuxYgurFAGn4GRbKuPKGbx1pD1bBwohtAriL7JqB12ECp4SnMN1T3q9</string>
     <string name="copied">Copied to clipboard</string>
-    <string name="close">Close</string>
 </resources>

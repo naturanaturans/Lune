@@ -4023,30 +4023,6 @@ fun PlayerOptionsBottomSheet(
                     onClick = onShowLyrics
                 )
             }
-
-            Divider()
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onRefreshSongs?.invoke(); onDismiss() }
-                    .padding(vertical = 14.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.Refresh,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = stringResource(R.string.refresh_library),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
         }
     }
 }

@@ -55,7 +55,6 @@
     <string name="option_automix">Automix</string>
     <string name="option_timer">Timer</string>
     <string name="option_lyrics">Lyrics</string>
-    <string name="refresh_library">Actualizar biblioteca</string>
     <string name="transition_mixing">Mezclando</string>
     <string name="transition_crossfade">Crossfade</string>
     <string name="unknown_artist">Artista desconocido</string>
@@ -307,5 +306,4 @@
     <string name="paypal">PayPal</string>
     <string name="monero">Monero</string>
     <string name="copied">Copiado al portapapeles</string>
-    <string name="close">Cerrar</string>
 </resources>
