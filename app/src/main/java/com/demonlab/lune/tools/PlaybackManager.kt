@@ -398,11 +398,13 @@ class PlaybackManager private constructor(private val context: Context) {
             return
         }
 
+        val advance = if (isTransitioning) 2 else 1
+
         val nextSong = if (isShuffle) {
             if (shuffledIndices.size != activePlaylist.size) {
                 updateShuffledQueue()
             }
-            val nextPos = (currentShufflePosition + 1)
+            val nextPos = (currentShufflePosition + advance)
             if (nextPos >= shuffledIndices.size) {
                 if (repeatMode == 2) { // Repeat All
                     currentShufflePosition = 0
@@ -421,8 +423,9 @@ class PlaybackManager private constructor(private val context: Context) {
             }
         } else {
             val currentIndex = activePlaylist.indexOfFirst { it.id == currentSong?.id }
-            if (currentIndex != -1 && currentIndex < activePlaylist.size - 1) {
-                activePlaylist[currentIndex + 1]
+            val targetIndex = if (currentIndex != -1) currentIndex + advance else -1
+            if (targetIndex != -1 && targetIndex < activePlaylist.size) {
+                activePlaylist[targetIndex]
             } else if (repeatMode == 2) { // Repeat All
                 activePlaylist[0]
             } else {
