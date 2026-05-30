@@ -981,7 +981,7 @@ fun MainScreen(
                                     Box(
                                         modifier = Modifier
                                             .fillMaxHeight()
-                                            .padding(4.dp)
+                                            .padding(vertical = 2.dp)
                                             .clip(RoundedCornerShape(20.dp))
                                             .then(
                                                 if (isSelected) Modifier.background(selectedBg, RoundedCornerShape(20.dp))
@@ -1012,43 +1012,50 @@ fun MainScreen(
                                                         overflow = TextOverflow.Ellipsis
                                                     )
                                                 } else {
-                                                    when (folder) {
-                                                        "RESUME" -> Icon(
-                                                            imageVector = Icons.Default.History,
-                                                            contentDescription = label,
-                                                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                                                            modifier = Modifier.size(20.dp)
-                                                        )
-                                                        "ALL" -> Icon(
-                                                            imageVector = Icons.Default.LibraryMusic,
-                                                            contentDescription = label,
-                                                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                                                            modifier = Modifier.size(20.dp)
-                                                        )
-                                                        "ALBUMS" -> Icon(
-                                                            imageVector = Icons.Default.Album,
-                                                            contentDescription = label,
-                                                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                                                            modifier = Modifier.size(20.dp)
-                                                        )
-                                                        "PLAYLISTS" -> Icon(
-                                                            imageVector = Icons.Default.QueueMusic,
-                                                            contentDescription = label,
-                                                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                                                            modifier = Modifier.size(20.dp)
-                                                        )
-                                                        "FAVORITES" -> Icon(
-                                                            imageVector = Icons.Default.FavoriteBorder,
-                                                            contentDescription = label,
-                                                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                                                            modifier = Modifier.size(20.dp)
-                                                        )
-                                                        else -> Icon(
-                                                            imageVector = Icons.Default.Folder,
-                                                            contentDescription = label,
-                                                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                                                            modifier = Modifier.size(20.dp)
-                                                        )
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .size(36.dp)
+                                                            .background(MaterialTheme.colorScheme.surfaceContainerHigh, CircleShape),
+                                                        contentAlignment = Alignment.Center
+                                                    ) {
+                                                        when (folder) {
+                                                            "RESUME" -> Icon(
+                                                                imageVector = Icons.Default.History,
+                                                                contentDescription = label,
+                                                                tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                                modifier = Modifier.size(20.dp)
+                                                            )
+                                                            "ALL" -> Icon(
+                                                                imageVector = Icons.Default.LibraryMusic,
+                                                                contentDescription = label,
+                                                                tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                                modifier = Modifier.size(20.dp)
+                                                            )
+                                                            "ALBUMS" -> Icon(
+                                                                imageVector = Icons.Default.Album,
+                                                                contentDescription = label,
+                                                                tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                                modifier = Modifier.size(20.dp)
+                                                            )
+                                                            "PLAYLISTS" -> Icon(
+                                                                imageVector = Icons.Default.QueueMusic,
+                                                                contentDescription = label,
+                                                                tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                                modifier = Modifier.size(20.dp)
+                                                            )
+                                                            "FAVORITES" -> Icon(
+                                                                imageVector = Icons.Default.FavoriteBorder,
+                                                                contentDescription = label,
+                                                                tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                                modifier = Modifier.size(20.dp)
+                                                            )
+                                                            else -> Icon(
+                                                                imageVector = Icons.Default.Folder,
+                                                                contentDescription = label,
+                                                                tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                                modifier = Modifier.size(20.dp)
+                                                            )
+                                                        }
                                                     }
                                                 }
                                             }
