@@ -3224,10 +3224,10 @@ fun FullPlayer(
             }
 
             // Full-screen cinematic background with smooth crossfade
-            Crossfade(targetState = song, animationSpec = tween(400)) { currentSong ->
-                val request = remember(currentSong.id) {
+            Crossfade(targetState = song.id, animationSpec = tween(400)) { _ ->
+                val request = remember(song.id) {
                     ImageRequest.Builder(context)
-                        .data(currentSong.coverUrl ?: currentSong.albumArtUri)
+                        .data(song.coverUrl ?: song.albumArtUri)
                         .crossfade(true)
                         .fallback(R.drawable.ic_artwork_fallback)
                         .error(R.drawable.ic_artwork_fallback)
@@ -3272,10 +3272,10 @@ fun FullPlayer(
                             drawRect(brush = blurGradientBrush, blendMode = BlendMode.DstIn)
                         }
                 ) {
-                    Crossfade(targetState = song, animationSpec = tween(400)) { currentSong ->
-                        val request = remember(currentSong.id) {
+                    Crossfade(targetState = song.id, animationSpec = tween(400)) { _ ->
+                        val request = remember(song.id) {
                             ImageRequest.Builder(context)
-                                .data(currentSong.coverUrl ?: currentSong.albumArtUri)
+                                .data(song.coverUrl ?: song.albumArtUri)
                                 .crossfade(true)
                                 .fallback(R.drawable.ic_artwork_fallback)
                                 .error(R.drawable.ic_artwork_fallback)
