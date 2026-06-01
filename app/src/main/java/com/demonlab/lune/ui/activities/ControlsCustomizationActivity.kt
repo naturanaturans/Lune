@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.demonlab.lune.R
 import com.demonlab.lune.tools.SettingsManager
+import com.demonlab.lune.ui.player.ReusableSkipIcon
 import com.demonlab.lune.ui.theme.LuneTheme
 import com.demonlab.lune.ui.theme.getControlsPrimaryColor
 
