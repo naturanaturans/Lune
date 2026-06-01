@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.rotate
@@ -84,6 +85,7 @@ import com.demonlab.lune.ui.viewmodels.MusicViewModel
 import java.io.File
 import kotlin.math.abs
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -305,10 +307,37 @@ fun FullPlayer(
     var showSpeedBar by remember { mutableStateOf(false) }
     var showVisualizerSettings by remember { mutableStateOf(false) }
 
+    val scope = rememberCoroutineScope()
+    val pillAnim = remember { Animatable(0f) }
+
+    LaunchedEffect(Unit) {
+        pillAnim.animateTo(
+            targetValue = 1f,
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessLow
+            )
+        )
+    }
+
+    fun retriggerPillAnim() {
+        scope.launch {
+            pillAnim.snapTo(0f)
+            pillAnim.animateTo(
+                targetValue = 1f,
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessLow
+                )
+            )
+        }
+    }
+
     LaunchedEffect(showVolumeBar) {
         if (showVolumeBar) {
             delay(3000)
             showVolumeBar = false
+            retriggerPillAnim()
         }
     }
 
@@ -316,6 +345,7 @@ fun FullPlayer(
         if (showSpeedBar) {
             delay(3000)
             showSpeedBar = false
+            retriggerPillAnim()
         }
     }
     val density = LocalDensity.current
@@ -967,67 +997,51 @@ fun FullPlayer(
                         }
                     }
                 } else {
-                    val isVisible = remember { MutableTransitionState(false) }.apply { targetState = true }
-
-                    AnimatedVisibility(
-                        visibleState = isVisible,
-                        enter = scaleIn(
-                            initialScale = 0.5f,
-                            animationSpec = spring(
-                                dampingRatio = Spring.DampingRatioMediumBouncy,
-                                stiffness = Spring.StiffnessLow
-                            )
-                        ) + fadeIn(),
-                        modifier = Modifier.fillMaxWidth()
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .graphicsLayer {
+                                scaleX = pillAnim.value
+                                scaleY = pillAnim.value
+                            },
+                        contentAlignment = Alignment.Center
                     ) {
                         Surface(
-                            shape = CircleShape,
-                            color = if (useBlurControls) blurContainerColor else MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 24.dp)
+                            shape = RoundedCornerShape(28.dp),
+                            color = if (useBlurControls) blurContainerColor else MaterialTheme.colorScheme.surfaceContainerHigh,
+                            modifier = Modifier.padding(horizontal = 32.dp)
                         ) {
                             Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 4.dp, horizontal = 10.dp),
-                                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                                modifier = Modifier.padding(vertical = 4.dp, horizontal = 6.dp),
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 PlayerActionButton(
                                     icon = playbackManager.currentOutputIcon,
                                     label = playbackManager.currentOutputName,
                                     onClick = { showVolumeBar = true },
-                                    shape = RoundedCornerShape(topStart = 28.dp, bottomStart = 28.dp, topEnd = 4.dp, bottomEnd = 4.dp),
-                                    containerColor = if (useBlurControls) blurContainerColor else null,
-                                    modifier = Modifier.weight(1f)
+                                    useBlurControls = useBlurControls
                                 )
 
                                 PlayerActionButton(
                                     icon = Icons.AutoMirrored.Filled.QueueMusic,
                                     label = stringResource(R.string.player_queue),
                                     onClick = { showQueueSheet = true },
-                                    shape = RoundedCornerShape(4.dp),
-                                    containerColor = if (useBlurControls) blurContainerColor else null,
-                                    modifier = Modifier.weight(1f)
+                                    useBlurControls = useBlurControls
                                 )
 
                                 PlayerActionButton(
                                     icon = Icons.Default.Speed,
                                     label = stringResource(R.string.option_speed),
                                     onClick = { showSpeedBar = true },
-                                    shape = RoundedCornerShape(4.dp),
-                                    containerColor = if (useBlurControls) blurContainerColor else null,
-                                    modifier = Modifier.weight(1f)
+                                    useBlurControls = useBlurControls
                                 )
 
                                 PlayerActionButton(
                                     icon = Icons.Default.MoreHoriz,
                                     label = stringResource(R.string.player_options),
                                     onClick = { showOptionsSheet = true },
-                                    shape = RoundedCornerShape(topStart = 4.dp, bottomStart = 4.dp, topEnd = 28.dp, bottomEnd = 28.dp),
-                                    containerColor = if (useBlurControls) blurContainerColor else null,
-                                    modifier = Modifier.weight(1f)
+                                    useBlurControls = useBlurControls
                                 )
                             }
                         }
@@ -1205,37 +1219,21 @@ fun PlayerActionButton(
     icon: ImageVector,
     label: String,
     onClick: () -> Unit,
-    shape: Shape = RoundedCornerShape(16.dp),
-    isActive: Boolean = false,
-    containerColor: Color? = null,
+    useBlurControls: Boolean = false,
     modifier: Modifier = Modifier
 ) {
-    val bgColor = containerColor ?: run {
-        val surfaceColor = MaterialTheme.colorScheme.surface
-        val luma = surfaceColor.red * 0.299f + surfaceColor.green * 0.587f + surfaceColor.blue * 0.114f
-        val isDark = luma < 0.5f
-        if (isActive) {
-            if (isDark) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.tertiary
-        } else {
-            if (isDark) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.primary
-        }
-    }
-
     Surface(
         onClick = onClick,
-        color = bgColor,
-        shape = shape,
-        modifier = modifier.bounceClick()
+        shape = CircleShape,
+        color = Color.Transparent,
+        modifier = modifier.size(36.dp).bounceClick()
     ) {
-        Box(
-            modifier = Modifier.padding(vertical = 8.dp),
-            contentAlignment = Alignment.Center
-        ) {
+        Box(contentAlignment = Alignment.Center) {
             Icon(
                 icon,
                 contentDescription = label,
-                modifier = Modifier.size(22.dp),
-                tint = Color.White
+                modifier = Modifier.size(20.dp),
+                tint = if (useBlurControls) Color.White else MaterialTheme.colorScheme.onSecondaryContainer
             )
         }
     }
