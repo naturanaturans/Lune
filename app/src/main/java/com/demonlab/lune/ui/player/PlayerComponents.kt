@@ -68,7 +68,7 @@ import com.demonlab.lune.R
 import com.demonlab.lune.tools.PlaybackManager
 import com.demonlab.lune.tools.SettingsManager
 import com.demonlab.lune.tools.Song
-import com.demonlab.lune.ui.activities.Album
+import com.demonlab.lune.ui.data.Album
 import com.demonlab.lune.ui.components.VinylRecordAsyncCover
 import com.demonlab.lune.ui.components.WaveformVisualizer
 import com.demonlab.lune.ui.sheets.AddToPlaylistDialog
