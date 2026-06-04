@@ -441,7 +441,9 @@ class MusicService : MediaBrowserServiceCompat() {
 
     fun crossfadeToSong(song: Song) {
         if (!isCrossfading) {
-            performCrossfade(song)
+            val mp = mediaPlayer
+            val remaining = if (mp != null) (mp.duration - mp.currentPosition).toLong() else 12000L
+            performCrossfade(song, if (remaining in 1..12000L) remaining else 12000L)
         }
     }
 
@@ -455,14 +457,15 @@ class MusicService : MediaBrowserServiceCompat() {
                 if (mp != null && mp.isPlaying && (playbackManager.isCrossfade || playbackManager.isAutomix) && !isCrossfading) {
                     val remaining = mp.duration - mp.currentPosition
                     val duration = mp.duration
-                    val triggerMs = 12000L // 12s per user request (Spotify-style)
+                    val maxTriggerMs = 12000L // Standard transition duration: 12 seconds
 
-                    // Only trigger if we have enough duration and are near the end
-                    if (duration > triggerMs && remaining in 1..triggerMs && mp.currentPosition > (duration / 2)) {
+                    // Only fire if we have enough time left and are nearing the end
+                    if (duration > maxTriggerMs && remaining in 1..maxTriggerMs && mp.currentPosition > (duration / 2)) {
                         val nextSong = playbackManager.getNextSong()
                         if (nextSong != null) {
-                            Log.d("MusicService", "Crossfade triggered for next song: ${nextSong.title}")
-                            performCrossfade(nextSong)
+                            Log.d("MusicService", "Crossfade triggered with duration: $remaining ms")
+                            // We pass the remaining real time as the transition duration
+                            performCrossfade(nextSong, remaining.toLong())
                         }
                     }
                 }
@@ -471,11 +474,10 @@ class MusicService : MediaBrowserServiceCompat() {
         }
     }
 
-    private fun performCrossfade(nextSong: Song) {
+    private fun performCrossfade(nextSong: Song, fadeDurationMs: Long) {
         isCrossfading = true
         val playbackManager = PlaybackManager.getInstance(applicationContext)
         playbackManager.isTransitioning = true
-        val fadeDurationMs = 12000L // 12s per user request
 
         secondaryPlayer?.setOnCompletionListener(null)
         secondaryPlayer?.setOnErrorListener(null)
@@ -490,10 +492,23 @@ class MusicService : MediaBrowserServiceCompat() {
 
         serviceScope.launch {
             try {
+                var prepared = false
                 withContext(Dispatchers.IO) {
-                    secondaryPlayer?.setDataSource(applicationContext, nextSong.uri)
-                    secondaryPlayer?.setVolume(0f, 0f)
-                    secondaryPlayer?.prepare()
+                    try {
+                        secondaryPlayer?.setDataSource(applicationContext, nextSong.uri)
+                        secondaryPlayer?.setVolume(0f, 0f)
+                        secondaryPlayer?.prepare()
+                        prepared = true
+                    } catch (e: Exception) {
+                        Log.e("MusicService", "Failed to prepare secondary player", e)
+                    }
+                }
+
+                if (!prepared) {
+                    isCrossfading = false
+                    playbackManager.isTransitioning = false
+                    playSong(nextSong)
+                    return@launch
                 }
 
                 val sessionId = secondaryPlayer?.audioSessionId ?: 0
@@ -515,6 +530,8 @@ class MusicService : MediaBrowserServiceCompat() {
                 }
 
                 secondaryPlayer?.start()
+                
+                // We ensure proper behavior in the event of premature termination
                 secondaryPlayer?.setOnCompletionListener {
                     if (!isCrossfading) {
                         PlaybackManager.getInstance(applicationContext).playNextFromService(true)
@@ -522,31 +539,22 @@ class MusicService : MediaBrowserServiceCompat() {
                 }
 
                 val steps = 100
-                val interval = fadeDurationMs / steps
-                val isAutomix = PlaybackManager.getInstance(applicationContext).isAutomix
+                val interval = (fadeDurationMs / steps).coerceAtLeast(10L)
 
                 for (i in 1..steps) {
                     if (!isCrossfading) break
 
                     while (!PlaybackManager.getInstance(applicationContext).isPlaying && isCrossfading) {
-                        delay(500)
+                        delay(100)
                     }
                     if (!isCrossfading) break
 
                     val normalizedNext = i.toFloat() / steps
 
-                    val volNext: Float
-                    val volCurrent: Float
-
-                    if (isAutomix) {
-                        val angle = (normalizedNext * Math.PI / 2)
-                        volNext = Math.sin(angle).toFloat()
-                        volCurrent = Math.cos(angle).toFloat()
-                    } else {
-                        volNext = normalizedNext * normalizedNext
-                        val normalizedCurrent = 1f - normalizedNext
-                        volCurrent = normalizedCurrent * normalizedCurrent
-                    }
+                    // Universal constant power curve to avoid volume dips
+                    val angle = (normalizedNext * Math.PI / 2)
+                    val volNext = Math.sin(angle).toFloat()
+                    val volCurrent = Math.cos(angle).toFloat()
 
                     mediaPlayer?.setVolume(volCurrent, volCurrent)
                     secondaryPlayer?.setVolume(volNext, volNext)
@@ -572,6 +580,13 @@ class MusicService : MediaBrowserServiceCompat() {
                 secondaryVirtualizer = null
 
                 mediaPlayer?.setVolume(1f, 1f)
+                
+                // Reconfigure the listener for the promoted player
+                mediaPlayer?.setOnCompletionListener {
+                    if (!isCrossfading) {
+                        PlaybackManager.getInstance(applicationContext).playNextFromService(true)
+                    }
+                }
 
                 withContext(Dispatchers.IO) {
                     oldPlayer?.setOnCompletionListener(null)
@@ -591,6 +606,7 @@ class MusicService : MediaBrowserServiceCompat() {
                 secondaryPlayer?.setOnErrorListener(null)
                 secondaryPlayer?.release()
                 secondaryPlayer = null
+                playSong(nextSong)
             } finally {
                 isCrossfading = false
                 playbackManager.isTransitioning = false
@@ -962,9 +978,10 @@ class MusicService : MediaBrowserServiceCompat() {
 
     private fun startWidgetUpdateTimer() {
         widgetUpdateJob?.cancel()
+        val powerManager = getSystemService(POWER_SERVICE) as android.os.PowerManager
         widgetUpdateJob = serviceScope.launch {
             while (isActive) {
-                if (isPlaying()) {
+                if (isPlaying() && powerManager.isInteractive) {
                     updateWidget()
                 }
                 delay(1000)
@@ -1006,12 +1023,16 @@ class MusicService : MediaBrowserServiceCompat() {
                     val art = fetchAlbumArt(song)
                     if (art != null) {
                         lastSongForRounded = song
-                        cachedRoundedArt = LuneWidgetProvider.getRoundedCornerBitmap(art, 40)
+                        
+                        // Performance fix: We process graphics resources outside the Main Thread
+                        withContext(Dispatchers.IO) {
+                            cachedRoundedArt = LuneWidgetProvider.getRoundedCornerBitmap(art, 40)
 
-                        // Also update blur cache if song changed
-                        if (lastSongForBlur != song) {
-                            lastSongForBlur = song
-                            lastBlurredBitmap = LuneWidgetProvider.getBlurredBitmap(this@MusicService, art, 25, 25)
+                            // Also update blur cache if song changed
+                            if (lastSongForBlur != song) {
+                                lastSongForBlur = song
+                                lastBlurredBitmap = LuneWidgetProvider.getBlurredBitmap(this@MusicService, art, 25, 25)
+                            }
                         }
                     } else {
                         lastSongForRounded = null
