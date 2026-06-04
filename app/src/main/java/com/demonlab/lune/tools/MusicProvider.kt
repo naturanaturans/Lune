@@ -92,7 +92,7 @@ class MusicProvider(private val context: Context) {
             MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
         }
 
-        val projection = arrayOf(
+        val projectionList = mutableListOf(
             MediaStore.Audio.Media._ID,
             MediaStore.Audio.Media.TITLE,
             MediaStore.Audio.Media.ARTIST,
@@ -104,9 +104,13 @@ class MusicProvider(private val context: Context) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 MediaStore.Audio.Media.GENRE
             } else {
-                MediaStore.Audio.Media.ARTIST // Safe fallback mapping
+                MediaStore.Audio.Media.ARTIST
             }
         )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            projectionList.add(MediaStore.Audio.Media.BITRATE)
+        }
+        val projection = projectionList.toTypedArray()
 
         val selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0"
         val sortOrder = "${MediaStore.Audio.Media.TITLE} ASC"
@@ -130,6 +134,9 @@ class MusicProvider(private val context: Context) {
             val dateAddedColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED)
             val genreColumn = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 cursor.getColumnIndex(MediaStore.Audio.Media.GENRE)
+            } else -1
+            val bitrateColumn = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                cursor.getColumnIndex(MediaStore.Audio.Media.BITRATE)
             } else -1
 
             while (cursor.moveToNext()) {
@@ -172,9 +179,17 @@ class MusicProvider(private val context: Context) {
                     else -> extension.uppercase()
                 }
                 val file = File(data)
-                val bitrate = if (duration > 0 && file.exists()) {
+                
+                val mediaStoreBitrate = if (bitrateColumn != -1) {
+                    val value = cursor.getInt(bitrateColumn)
+                    if (value > 0) value else null
+                } else null
+
+                val calculatedBitrate = if (duration > 0 && file.exists()) {
                     ((file.length() * 8) / (duration / 1000f)).toInt()
                 } else null
+
+                val bitrate = mediaStoreBitrate ?: calculatedBitrate
 
                 val contentUri: Uri = ContentUris.withAppendedId(collection, id)
 
