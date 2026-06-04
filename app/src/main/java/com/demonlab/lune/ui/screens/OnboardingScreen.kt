@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material.icons.filled.CompareArrows
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.Image
@@ -73,7 +74,8 @@ fun OnboardingScreen(
             5 -> ManageFilesPermissionStep(onNext = { currentStep = 6 })
             6 -> FolderVisibilityStep(onNext = { currentStep = 7 })
             7 -> PermissionsReminderStep(onNext = { currentStep = 8 })
-            8 -> FeaturesStep(onFinish = onStartClick)
+            8 -> SupportStep(onNext = { currentStep = 9 })
+            9 -> FeaturesStep(onFinish = onStartClick)
         }
     }
 }
@@ -1283,6 +1285,90 @@ fun PermissionsReminderStep(onNext: () -> Unit) {
             ) {
                 Text(
                     stringResource(R.string.onboarding_reminder_button),
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun SupportStep(onNext: () -> Unit) {
+    val isDark = isSystemInDarkTheme()
+    val diamondsColor = if (isDark) Color.White else Color.Black
+    val iconColor = if (isDark) Color.Black else Color.White
+
+    val infiniteTransition = rememberInfiniteTransition(label = "InfiniteLogoRotationSupport")
+    val rotation by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 3000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "LogoRotation"
+    )
+
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.size(200.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_logo_diamonds),
+                    contentDescription = null,
+                    tint = diamondsColor,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .graphicsLayer(rotationZ = rotation)
+                )
+                Icon(
+                    imageVector = Icons.Default.Favorite,
+                    contentDescription = null,
+                    tint = iconColor,
+                    modifier = Modifier.size(50.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = stringResource(R.string.onboarding_support_title),
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = stringResource(R.string.onboarding_support_desc),
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.height(48.dp))
+
+            Button(
+                onClick = onNext,
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Text(
+                    stringResource(R.string.onboarding_next_button),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )

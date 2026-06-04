@@ -314,6 +314,8 @@
     <string name="onboarding_folder_visibility_title">Visibilidade de Pastas</string>
     <string name="onboarding_folder_visibility_desc">Por padrão, o Lune mostrará apenas músicas da pasta selecionada. Ative esta opção para mostrar todas as pastas de música desde o início.</string>
     <string name="onboarding_folder_visibility_label">Mostrar todas as pastas</string>
+    <string name="onboarding_support_title">Apoie o Projeto</string>
+    <string name="onboarding_support_desc">Se você gosta do Lune, considere nos apoiar na seção Doar em Configurações > Sobre. Cada contribuição ajuda o app a continuar crescendo!</string>
     <string name="option_share">Compartilhar</string>
     <string name="option_speed">Velocidade</string>
 

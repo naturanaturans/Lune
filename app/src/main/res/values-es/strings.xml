@@ -315,6 +315,8 @@
     <string name="onboarding_folder_visibility_title">Visibilidad de Carpetas</string>
     <string name="onboarding_folder_visibility_desc">Por defecto, Lune solo mostrará canciones de la carpeta de música seleccionada. Activa esta opción para mostrar todas las carpetas de música desde el inicio.</string>
     <string name="onboarding_folder_visibility_label">Mostrar todas las carpetas</string>
+    <string name="onboarding_support_title">Apoya el Proyecto</string>
+    <string name="onboarding_support_desc">Si disfrutas Lune, considera apoyarnos en la sección Donar en Ajustes > Acerca de. ¡Cada contribución ayuda a que la app siga creciendo!</string>
     <string name="option_speed">Velocidad</string>
 
     <!-- Donate -->

@@ -316,6 +316,8 @@
     <string name="onboarding_folder_visibility_title">Folder Visibility</string>
     <string name="onboarding_folder_visibility_desc">By default, Lune will only show songs from your selected music folder. Enable this option to show all music folders on your device from the start.</string>
     <string name="onboarding_folder_visibility_label">Show all folders</string>
+    <string name="onboarding_support_title">Support the Project</string>
+    <string name="onboarding_support_desc">If you enjoy Lune, consider supporting us through the Donate section in Settings > About. Every contribution helps keep the app growing!</string>
     <string name="option_speed">Speed</string>
 
     <!-- Donate -->
