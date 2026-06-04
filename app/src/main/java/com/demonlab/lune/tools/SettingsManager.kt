@@ -210,6 +210,10 @@ class SettingsManager(context: Context) {
         get() = prefs.getBoolean("is_initial_folder_scan_pending", false)
         set(value) = prefs.edit().putBoolean("is_initial_folder_scan_pending", value).apply()
 
+    var showAllFoldersOnStart: Boolean
+        get() = prefs.getBoolean("show_all_folders_on_start", false)
+        set(value) = prefs.edit().putBoolean("show_all_folders_on_start", value).apply()
+
     var useCustomColors: Boolean
         get() = prefs.getBoolean("use_custom_colors", false)
         set(value) = prefs.edit().putBoolean("use_custom_colors", value).apply()

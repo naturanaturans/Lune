@@ -313,12 +313,16 @@
     <string name="onboarding_reminder_title">You\'re in control</string>
     <string name="onboarding_reminder_desc">If you skipped any permission, you can easily enable it later in Settings > Security > Permissions.</string>
     <string name="onboarding_reminder_button">Got it</string>
+    <string name="onboarding_folder_visibility_title">Folder Visibility</string>
+    <string name="onboarding_folder_visibility_desc">By default, Lune will only show songs from your selected music folder. Enable this option to show all music folders on your device from the start.</string>
+    <string name="onboarding_folder_visibility_label">Show all folders</string>
     <string name="option_speed">Speed</string>
 
     <!-- Donate -->
     <string name="donate_title">Support the Project</string>
     <string name="paypal">PayPal</string>
     <string name="monero">Monero</string>
+    <string name="patreon">Patreon</string>
     <string name="monero_address">88s5Re4p6a3P9TtqaG1G2Yeq5Ppp1w1npXebyLjktuxYgurFAGn4GRbKuPKGbx1pD1bBwohtAriL7JqB12ECp4SnMN1T3q9</string>
     <string name="copied">Copied to clipboard</string>
 </resources>

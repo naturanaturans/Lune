@@ -312,11 +312,15 @@
     <string name="onboarding_reminder_title">Tú tienes el control</string>
     <string name="onboarding_reminder_desc">Si omitiste algún permiso, puedes activarlo fácilmente más tarde en Ajustes > Seguridad > Permisos.</string>
     <string name="onboarding_reminder_button">Entendido</string>
+    <string name="onboarding_folder_visibility_title">Visibilidad de Carpetas</string>
+    <string name="onboarding_folder_visibility_desc">Por defecto, Lune solo mostrará canciones de la carpeta de música seleccionada. Activa esta opción para mostrar todas las carpetas de música desde el inicio.</string>
+    <string name="onboarding_folder_visibility_label">Mostrar todas las carpetas</string>
     <string name="option_speed">Velocidad</string>
 
     <!-- Donate -->
     <string name="donate_title">Apoya el Proyecto</string>
     <string name="paypal">PayPal</string>
     <string name="monero">Monero</string>
+    <string name="patreon">Patreon</string>
     <string name="copied">Copiado al portapapeles</string>
 </resources>

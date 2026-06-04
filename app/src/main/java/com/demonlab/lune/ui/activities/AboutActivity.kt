@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocalCafe
 import androidx.compose.material.icons.filled.MonetizationOn
@@ -407,6 +408,20 @@ fun DonateDialog(onDismiss: () -> Unit) {
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(stringResource(R.string.paypal))
+                }
+
+                Button(
+                    onClick = { uriHandler.openUri("https://www.patreon.com/mrdemonc") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Favorite,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(R.string.patreon))
                 }
 
                 Button(

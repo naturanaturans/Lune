@@ -312,10 +312,14 @@
     <string name="onboarding_reminder_title">Vous gardez le contrôle</string>
     <string name="onboarding_reminder_desc">Si vous avez ignoré une permission, vous pourrez facilement l’activer plus tard dans Paramètres > Sécurité > Permissions.</string>
     <string name="onboarding_reminder_button">Compris</string>
-
+    <string name="onboarding_folder_visibility_title">Visibilité des Dossiers</string>
+    <string name="onboarding_folder_visibility_desc">Par défaut, Lune n\'affichera que les morceaux du dossier sélectionné. Activez cette option pour afficher tous les dossiers musicaux dès le début.</string>
+    <string name="onboarding_folder_visibility_label">Afficher tous les dossiers</string>
+    
     <!-- Donate -->
     <string name="donate_title">Soutenez le Projet</string>
     <string name="paypal">PayPal</string>
     <string name="monero">Monero</string>
+    <string name="patreon">Patreon</string>
     <string name="copied">Copié dans le presse-papier</string>
 </resources>

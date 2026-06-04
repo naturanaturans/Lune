@@ -311,6 +311,9 @@
     <string name="onboarding_reminder_title">Você está no controle</string>
     <string name="onboarding_reminder_desc">Se você pulou alguma permissão, pode ativá-la facilmente mais tarde em Configurações > Segurança > Permissões.</string>
     <string name="onboarding_reminder_button">Entendido</string>
+    <string name="onboarding_folder_visibility_title">Visibilidade de Pastas</string>
+    <string name="onboarding_folder_visibility_desc">Por padrão, o Lune mostrará apenas músicas da pasta selecionada. Ative esta opção para mostrar todas as pastas de música desde o início.</string>
+    <string name="onboarding_folder_visibility_label">Mostrar todas as pastas</string>
     <string name="option_share">Compartilhar</string>
     <string name="option_speed">Velocidade</string>
 
@@ -318,5 +321,6 @@
     <string name="donate_title">Apoie o Projeto</string>
     <string name="paypal">PayPal</string>
     <string name="monero">Monero</string>
+    <string name="patreon">Patreon</string>
     <string name="copied">Copiado para a área de transferência</string>
 </resources>
