@@ -944,4 +944,53 @@ class PlaybackManager private constructor(private val context: Context) {
         val volume = (percent * maxVolume).toInt()
         audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0)
     }
+
+    fun removeFromQueue(songId: Long) {
+        val idx = activePlaylist.indexOfFirst { it.id == songId }
+        if (idx == -1) return
+
+        val mutable = activePlaylist.toMutableList()
+        mutable.removeAt(idx)
+        activePlaylist = mutable
+
+        if (isShuffle && shuffledIndices.isNotEmpty()) {
+            val shufMutable = shuffledIndices.toMutableList()
+            shufMutable.remove(idx)
+            for (i in shufMutable.indices) {
+                if (shufMutable[i] > idx) shufMutable[i]--
+            }
+            shuffledIndices = shufMutable
+        }
+    }
+
+    fun moveToNextInQueue(songId: Long) {
+        val song = activePlaylist.find { it.id == songId } ?: return
+        val current = currentSong ?: return
+        if (song.id == current.id) return
+
+        val mutable = activePlaylist.toMutableList()
+        val oldIdx = mutable.indexOfFirst { it.id == songId }
+        mutable.removeAt(oldIdx)
+        val currentIdx = mutable.indexOfFirst { it.id == current.id }
+        mutable.add(currentIdx + 1, song)
+        activePlaylist = mutable
+        val newIdx = currentIdx + 1
+
+        if (isShuffle && shuffledIndices.isNotEmpty()) {
+            val shufMutable = shuffledIndices.toMutableList()
+            shufMutable.remove(oldIdx)
+            for (i in shufMutable.indices) {
+                val v = shufMutable[i]
+                if (oldIdx < newIdx && v in (oldIdx + 1)..newIdx) {
+                    shufMutable[i] = v - 1
+                } else if (oldIdx > newIdx && v in newIdx until oldIdx) {
+                    shufMutable[i] = v + 1
+                }
+            }
+            val currentSongIdx = activePlaylist.indexOfFirst { it.id == current.id }
+            val insertPos = (shufMutable.indexOf(currentSongIdx) + 1).coerceAtMost(shufMutable.size)
+            shufMutable.add(insertPos, newIdx)
+            shuffledIndices = shufMutable
+        }
+    }
 }

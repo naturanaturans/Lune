@@ -7,9 +7,14 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -30,11 +35,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -46,6 +55,8 @@ import com.demonlab.lune.ui.viewmodels.MusicViewModel
 import com.demonlab.lune.tools.PlaybackManager
 import com.demonlab.lune.tools.SettingsManager
 import com.demonlab.lune.tools.Song
+import kotlin.math.abs
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,8 +65,7 @@ fun SongOptionsBottomSheet(
     onDismiss: () -> Unit,
     onAddToPlaylistClick: () -> Unit,
     onEditMetadataClick: () -> Unit,
-    onDeleteClick: () -> Unit,
-    onMoveClick: (() -> Unit)? = null
+    onDeleteClick: () -> Unit
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -118,45 +128,11 @@ fun SongOptionsBottomSheet(
                     }
                 )
             }
-            if (onMoveClick != null) {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 1.dp),
-                    shape = RoundedCornerShape(4.dp),
-                    color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f)
-                ) {
-                    ListItem(
-                        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                        headlineContent = { Text(stringResource(R.string.move_song)) },
-                        leadingContent = {
-                            Surface(
-                                shape = CircleShape,
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                modifier = Modifier.size(40.dp)
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Icon(
-                                        Icons.Default.SwapVert,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
-                            }
-                        },
-                        modifier = Modifier.clickable {
-                            onDismiss()
-                            onMoveClick()
-                        }
-                    )
-                }
-            }
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 1.dp),
-                shape = RoundedCornerShape(if (onMoveClick != null) 4.dp else 4.dp),
+                shape = RoundedCornerShape(4.dp),
                 color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f)
             ) {
                 ListItem(
@@ -553,7 +529,6 @@ fun QueueBottomSheet(
     val musicViewModel: MusicViewModel = viewModel()
     var optionsSong by remember { mutableStateOf<Song?>(null) }
     var showOptionsSheet by remember { mutableStateOf(false) }
-    var showMoveSheet by remember { mutableStateOf(false) }
     var showAddToPlaylist by remember { mutableStateOf(false) }
     var showEditSheet by remember { mutableStateOf(false) }
 
@@ -573,100 +548,7 @@ fun QueueBottomSheet(
                 showOptionsSheet = false
                 Toast.makeText(context, "Funcionalidad de borrado disponible en la lista principal", Toast.LENGTH_SHORT).show()
             },
-            onMoveClick = if (optionsSong?.id != playbackManager.currentSong?.id) {
-                {
-                    showOptionsSheet = false
-                    showMoveSheet = true
-                }
-            } else null
         )
-    }
-
-    if (showMoveSheet && optionsSong != null) {
-        ModalBottomSheet(
-            onDismissRequest = { showMoveSheet = false },
-            containerColor = MaterialTheme.colorScheme.surface
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 32.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.move_song_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
-                )
-
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp),
-                    shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp, bottomStart = 4.dp, bottomEnd = 4.dp),
-                    color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f)
-                ) {
-                    ListItem(
-                        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                        headlineContent = { Text(stringResource(R.string.move_to_front)) },
-                        supportingContent = { Text(stringResource(R.string.move_to_front_desc)) },
-                        leadingContent = {
-                            Surface(
-                                shape = CircleShape,
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                modifier = Modifier.size(40.dp)
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Icon(
-                                        Icons.Default.SkipNext,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
-                            }
-                        },
-                        modifier = Modifier.clickable {
-                            playbackManager.reorderQueueForSong(optionsSong!!, moveToFront = true)
-                            showMoveSheet = false
-                        }
-                    )
-                }
-
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp),
-                    shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp, bottomStart = 28.dp, bottomEnd = 28.dp),
-                    color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f)
-                ) {
-                    ListItem(
-                        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                        headlineContent = { Text(stringResource(R.string.move_to_end)) },
-                        supportingContent = { Text(stringResource(R.string.move_to_end_desc)) },
-                        leadingContent = {
-                            Surface(
-                                shape = CircleShape,
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                modifier = Modifier.size(40.dp)
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Icon(
-                                        Icons.AutoMirrored.Filled.LastPage,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
-                            }
-                        },
-                        modifier = Modifier.clickable {
-                            playbackManager.reorderQueueForSong(optionsSong!!, moveToFront = false)
-                            showMoveSheet = false
-                        }
-                    )
-                }
-            }
-        }
     }
 
     if (showAddToPlaylist && optionsSong != null) {
@@ -785,28 +667,112 @@ fun QueueBottomSheet(
                     emptyList()
                 }
                 
-                itemsIndexed(nextSongs) { index, song ->
-                    val isFirst = index == 0
-                    val isLast = index == nextSongs.lastIndex
-                    SongItem(
-                        isFirst = isFirst,
-                        isLast = isLast,
-                        song = song,
-                        currentlyPlaying = false,
-                        isPlaying = false,
-                        onClick = { 
-                            playbackManager.play(song, activePlaylist, playbackManager.activePlaylistId, playbackManager.activeCategory, fromQueue = true)
-                        },
-                        onOptionsClick = {
-                            optionsSong = song
-                            showOptionsSheet = true
-                        },
-                        onFavoriteClick = { s ->
-                            playbackManager.toggleFavorite(s)?.let { updated ->
-                                musicViewModel.syncFavoriteStatusInMemory(updated.id, updated.isFavorite)
+                items(nextSongs, key = { it.id }) { song ->
+                    val isFirst = nextSongs.first() == song
+                    val isLast = nextSongs.last() == song
+                    var rawOffset by remember { mutableFloatStateOf(0f) }
+                    var isDragging by remember { mutableStateOf(false) }
+                    val displayOffset by animateFloatAsState(
+                        targetValue = if (isDragging) rawOffset else 0f,
+                        animationSpec = if (isDragging) snap() else tween(durationMillis = 250),
+                        label = "swipe"
+                    )
+                    val threshold = with(LocalDensity.current) { 80.dp.toPx() }
+                    val maxOffset = with(LocalDensity.current) { 150.dp.toPx() }
+                    Box {
+                        val swipeProgress = (abs(displayOffset) / threshold).coerceAtMost(1f)
+                        if (displayOffset > 0f) {
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.CenterStart)
+                                    .padding(start = 24.dp)
+                                    .size(40.dp)
+                                    .graphicsLayer {
+                                        alpha = swipeProgress
+                                        scaleX = swipeProgress
+                                        scaleY = swipeProgress
+                                    }
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.errorContainer),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    Icons.Default.Delete,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onErrorContainer,
+                                    modifier = Modifier.size(20.dp)
+                                )
                             }
                         }
-                    )
+                        if (displayOffset < 0f) {
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.CenterEnd)
+                                    .padding(end = 24.dp)
+                                    .size(40.dp)
+                                    .graphicsLayer {
+                                        alpha = swipeProgress
+                                        scaleX = swipeProgress
+                                        scaleY = swipeProgress
+                                    }
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.tertiaryContainer),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    Icons.Default.SkipNext,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onTertiaryContainer,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+                        Box(modifier = Modifier.offset { IntOffset(displayOffset.roundToInt(), 0) }) {
+                            SongItem(
+                                isFirst = isFirst,
+                                isLast = isLast,
+                                song = song,
+                                currentlyPlaying = false,
+                                isPlaying = false,
+                                onClick = {
+                                    playbackManager.play(song, activePlaylist, playbackManager.activePlaylistId, playbackManager.activeCategory, fromQueue = true)
+                                },
+                                onOptionsClick = {
+                                    optionsSong = song
+                                    showOptionsSheet = true
+                                },
+                                onFavoriteClick = { s ->
+                                    playbackManager.toggleFavorite(s)?.let { updated ->
+                                        musicViewModel.syncFavoriteStatusInMemory(updated.id, updated.isFavorite)
+                                    }
+                                },
+                                modifier = Modifier.pointerInput(song.id) {
+                                    detectHorizontalDragGestures(
+                                        onDragStart = {
+                                            rawOffset = 0f
+                                            isDragging = true
+                                        },
+                                        onDragEnd = {
+                                            isDragging = false
+                                            if (rawOffset < -threshold) {
+                                                playbackManager.moveToNextInQueue(song.id)
+                                            } else if (rawOffset > threshold) {
+                                                playbackManager.removeFromQueue(song.id)
+                                            }
+                                            rawOffset = 0f
+                                        },
+                                        onDragCancel = {
+                                            isDragging = false
+                                            rawOffset = 0f
+                                        },
+                                        onHorizontalDrag = { _, dragAmount ->
+                                            rawOffset = (rawOffset + dragAmount).coerceIn(-maxOffset, maxOffset)
+                                        }
+                                    )
+                                }
+                            )
+                        }
+                    }
                 }
             }
         }
