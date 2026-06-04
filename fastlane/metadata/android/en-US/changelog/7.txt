@@ -1,0 +1,5 @@
+- Re-design buttom and move options
+- Play result list search
+- Fix bug in crossfade
+- Add new option in OnBoarding for folder filters
+- Minor changes and fixes
