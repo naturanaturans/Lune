@@ -284,7 +284,7 @@
     <string name="onboarding_folder_visibility_label">Afficher tous les dossiers</string>
     <string name="onboarding_support_title">Soutenez le Projet</string>
     <string name="onboarding_support_desc">Si vous aimez Lune, pensez à nous soutenir via la section Faire un don dans Paramètres > À propos. Chaque contribution aide l\'application à continuer de grandir !</string>
-    <string name="search_play_all">Tout Lire</string>
+    <string name="search_play_all">Lire</string>
     <string name="search_shuffle">Aléatoire</string>
     <string name="playing_from">Lecture depuis: %s</string>
     <string name="playing_from_search">Résultat de recherche</string>

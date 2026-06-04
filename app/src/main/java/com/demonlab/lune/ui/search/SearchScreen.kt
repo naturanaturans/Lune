@@ -245,45 +245,73 @@ fun SearchScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp, vertical = 4.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(0.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            FilledTonalButton(
-                                onClick = { onPlayAll(searchResults.songs, searchShuffle) },
-                                modifier = Modifier.weight(1f).height(btnHeight),
-                                contentPadding = PaddingValues(horizontal = 24.dp)
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.weight(1f)
                             ) {
-                                Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
-                                Spacer(Modifier.width(8.dp))
-                                Text(stringResource(R.string.search_play_all))
-                            }
-                            FilledTonalButton(
-                                onClick = {
-                                    if (isSearchActive) {
-                                        pm.toggleShuffle()
-                                        searchShuffle = pm.isShuffle
-                                    } else {
-                                        val newState = !searchShuffle
-                                        searchShuffle = newState
-                                        settings.setPlaylistShuffle(-300L, newState)
+                                Surface(
+                                    onClick = { onPlayAll(searchResults.songs, searchShuffle) },
+                                    shape = RoundedCornerShape(topStart = 26.dp, bottomStart = 26.dp, topEnd = 4.dp, bottomEnd = 4.dp),
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(btnHeight)
+                                ) {
+                                    Box(
+                                        contentAlignment = Alignment.Center,
+                                        modifier = Modifier.fillMaxSize()
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.Center
+                                        ) {
+                                            Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
+                                            Spacer(Modifier.width(8.dp))
+                                            Text(
+                                                stringResource(R.string.search_play_all),
+                                                color = MaterialTheme.colorScheme.onPrimary
+                                            )
+                                        }
                                     }
-                                },
-                                modifier = Modifier.weight(1f).height(btnHeight),
-                                colors = if (searchShuffle)
-                                    ButtonDefaults.filledTonalButtonColors(
-                                        containerColor = MaterialTheme.colorScheme.primary,
-                                        contentColor = MaterialTheme.colorScheme.onPrimary
-                                    )
-                                else
-                                    ButtonDefaults.filledTonalButtonColors(
-                                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                        contentColor = MaterialTheme.colorScheme.onSurface
-                                    ),
-                                contentPadding = PaddingValues(horizontal = 24.dp)
-                            ) {
-                                Icon(Icons.Default.Shuffle, contentDescription = null, modifier = Modifier.size(18.dp))
-                                Spacer(Modifier.width(8.dp))
-                                Text(stringResource(R.string.search_shuffle))
+                                }
+                                Surface(
+                                    onClick = {
+                                        if (isSearchActive) {
+                                            pm.toggleShuffle()
+                                            searchShuffle = pm.isShuffle
+                                        } else {
+                                            val newState = !searchShuffle
+                                            searchShuffle = newState
+                                            settings.setPlaylistShuffle(-300L, newState)
+                                        }
+                                    },
+                                    shape = RoundedCornerShape(topStart = 4.dp, bottomStart = 4.dp, topEnd = 26.dp, bottomEnd = 26.dp),
+                                    color = if (searchShuffle) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(btnHeight)
+                                ) {
+                                    Box(
+                                        contentAlignment = Alignment.Center,
+                                        modifier = Modifier.fillMaxSize()
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.Center
+                                        ) {
+                                            Icon(Icons.Default.Shuffle, contentDescription = null, modifier = Modifier.size(18.dp))
+                                            Spacer(Modifier.width(8.dp))
+                                            Text(
+                                                stringResource(R.string.search_shuffle),
+                                                color = if (searchShuffle) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                                            )
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

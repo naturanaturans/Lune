@@ -284,7 +284,7 @@
     <string name="onboarding_folder_visibility_label">Mostrar todas las carpetas</string>
     <string name="onboarding_support_title">Apoya el Proyecto</string>
     <string name="onboarding_support_desc">Si disfrutas Lune, considera apoyarnos en la sección Donar en Ajustes > Acerca de. ¡Cada contribución ayuda a que la app siga creciendo!</string>
-    <string name="search_play_all">Reproducir Todo</string>
+    <string name="search_play_all">Reproducir</string>
     <string name="search_shuffle">Aleatorio</string>
     <string name="playing_from">Sonando desde: %s</string>
     <string name="playing_from_search">Resultado de búsqueda</string>

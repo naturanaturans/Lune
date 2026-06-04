@@ -285,7 +285,7 @@
     <string name="onboarding_folder_visibility_label">Show all folders</string>
     <string name="onboarding_support_title">Support the Project</string>
     <string name="onboarding_support_desc">If you enjoy Lune, consider supporting us through the Donate section in Settings > About. Every contribution helps keep the app growing!</string>
-    <string name="search_play_all">Play All</string>
+    <string name="search_play_all">Play</string>
     <string name="search_shuffle">Shuffle</string>
     <string name="playing_from">Playing from: %s</string>
     <string name="playing_from_search">Search result</string>
