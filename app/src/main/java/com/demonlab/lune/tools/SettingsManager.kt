@@ -103,6 +103,18 @@ class SettingsManager(context: Context) {
         get() = prefs.getString("active_eq_preset_name", "") ?: ""
         set(value) = prefs.edit().putString("active_eq_preset_name", value).apply()
 
+    var lastEqPresetName: String
+        get() = prefs.getString("last_eq_preset_name", "") ?: ""
+        set(value) = prefs.edit().putString("last_eq_preset_name", value).apply()
+
+    var lastEqBandLevels: String
+        get() = prefs.getString("last_eq_band_levels", "") ?: ""
+        set(value) = prefs.edit().putString("last_eq_band_levels", value).apply()
+
+    var customEqPresetsJson: String
+        get() = prefs.getString("custom_eq_presets", "[]") ?: "[]"
+        set(value) = prefs.edit().putString("custom_eq_presets", value).apply()
+
     var isBassBoostEnabled: Boolean
         get() = prefs.getBoolean("is_bass_enabled", false)
         set(value) = prefs.edit().putBoolean("is_bass_enabled", value).apply()

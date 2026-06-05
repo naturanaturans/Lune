@@ -154,6 +154,7 @@
     <string name="option_repeat_off">No repetir</string>
     <string name="output_speaker">Teléfono</string>
     <string name="output_headphones">Audífonos</string>
+    <string name="no_song_playing">Sin reproducción</string>
     <string name="output_bluetooth">Bluetooth</string>
     <string name="queue_now_playing">Reproduciendo ahora</string>
     <string name="queue_up_next">Siguientes</string>
@@ -289,11 +290,15 @@
     <string name="playing_from">Sonando desde: %s</string>
     <string name="playing_from_search">Resultado de búsqueda</string>
     <string name="option_speed">Velocidad</string>
+    <string name="preset_name">Nombre del preset</string>
+    <string name="cd_save_preset">Guardar preset</string>
+    <string name="cd_delete_preset">Eliminar preset</string>
 
     <!-- Donate -->
     <string name="donate_title">Apoya el Proyecto</string>
     <string name="paypal">PayPal</string>
     <string name="monero">Monero</string>
     <string name="patreon">Patreon</string>
+    <string name="monero_address">88s5Re4p6a3P9TtqaG1G2Yeq5Ppp1w1npXebyLjktuxYgurFAGn4GRbKuPKGbx1pD1bBwohtAriL7JqB12ECp4SnMN1T3q9</string>
     <string name="copied">Copiado al portapapeles</string>
 </resources>

@@ -194,9 +194,10 @@
     <string name="gson_desc">Uma biblioteca de serialização/desserialização Java para converter Objetos Java em JSON e vice-versa.\nLicença: Apache License 2.0</string> 
     <string name="room_desc">A biblioteca de persistência Room fornece uma camada de abraço sobre o SQLite.\nLicença: Apache License 2.0</string> 
     <string name="compose_desc">O kit de ferramentas moderno do Android para criar interfaces nativas.\nLicença: Apache License 2.0</string> 
-    <string name="jaudiotagger_desc">Biblioteca de etiquetas de áudio para editar e ler formatos como ID3, Vorbis e FLAC.\nLicença: LGPL v2.1</string> 
+    <string name="jaudiotagger_desc">Biblioteca de etiquetas de áudio para editar e ler formatos como ID3, Vorbis e FLAC.\nLicença: LGPL v2.1</string>
+    <string name="quicksand_desc">Quicksand é uma fonte sem serifa projetada por Andrew Paglinawan.\nLicença: SIL Open Font License, 1.1</string>
 
-    <string name="permissions">Permissões</string> 
+    <string name="permissions">Permissões</string>
     <string name="permissions_desc">Informações sobre permissões utilizadas</string>
     <string name="perm_storage_title">Acesso ao Armazenamento</string>
     <string name="perm_storage_desc">Necessário para escanear arquivos de música e gerenciar pastas no seu dispositivo.</string>
@@ -289,11 +290,15 @@
     <string name="playing_from_search">Resultado da busca</string>
     <string name="option_share">Compartilhar</string>
     <string name="option_speed">Velocidade</string>
+    <string name="preset_name">Nome do preset</string>
+    <string name="cd_save_preset">Salvar preset</string>
+    <string name="cd_delete_preset">Excluir preset</string>
 
     <!-- Donate -->
     <string name="donate_title">Apoie o Projeto</string>
     <string name="paypal">PayPal</string>
     <string name="monero">Monero</string>
     <string name="patreon">Patreon</string>
+    <string name="monero_address">88s5Re4p6a3P9TtqaG1G2Yeq5Ppp1w1npXebyLjktuxYgurFAGn4GRbKuPKGbx1pD1bBwohtAriL7JqB12ECp4SnMN1T3q9</string>
     <string name="copied">Copiado para a área de transferência</string>
 </resources>

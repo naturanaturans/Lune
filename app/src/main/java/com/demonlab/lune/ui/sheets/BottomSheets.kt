@@ -55,6 +55,7 @@ import com.demonlab.lune.ui.viewmodels.MusicViewModel
 import com.demonlab.lune.tools.PlaybackManager
 import com.demonlab.lune.tools.SettingsManager
 import com.demonlab.lune.tools.Song
+import com.demonlab.lune.ui.activities.EqualizerActivity
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -843,14 +844,6 @@ fun PlayerOptionsBottomSheet(
         dragHandle = { BottomSheetDefaults.DragHandle() }
     ) {
         val isFavorite = playbackManager.currentSong?.isFavorite == true
-        var showEqSheet by remember { mutableStateOf(false) }
-
-        if (showEqSheet) {
-            EqBottomSheet(
-                playbackManager = playbackManager,
-                onDismiss = { showEqSheet = false }
-            )
-        }
 
         Column(
             modifier = Modifier
@@ -865,25 +858,27 @@ fun PlayerOptionsBottomSheet(
             ) {
                 val context = LocalContext.current
                 val song = playbackManager.currentSong
-                OptionButton(
-                    icon = Icons.Default.Share,
-                    label = stringResource(R.string.option_share),
-                    active = false,
-                    onClick = {
-                        song?.let {
-                            try {
-                                val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
-                                    type = "audio/*"
-                                    putExtra(android.content.Intent.EXTRA_STREAM, it.uri)
-                                    addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                    OptionButton(
+                        icon = Icons.Default.Share,
+                        label = stringResource(R.string.option_share),
+                        active = false,
+                        onClick = {
+                            song?.let {
+                                try {
+                                    val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                                        type = "audio/*"
+                                        putExtra(android.content.Intent.EXTRA_STREAM, it.uri)
+                                        addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                    }
+                                    context.startActivity(android.content.Intent.createChooser(shareIntent, context.getString(R.string.option_share)))
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
                                 }
-                                context.startActivity(android.content.Intent.createChooser(shareIntent, context.getString(R.string.option_share)))
-                            } catch (e: Exception) {
-                                e.printStackTrace()
                             }
                         }
-                    }
-                )
+                    )
+                }
 
                 // Repeat
                 val repeatIcon = when (playbackManager.repeatMode) {
@@ -895,28 +890,34 @@ fun PlayerOptionsBottomSheet(
                     2 -> stringResource(R.string.option_repeat_all)
                     else -> stringResource(R.string.option_repeat_off)
                 }
-                OptionButton(
-                    icon = repeatIcon,
-                    label = repeatLabel,
-                    active = playbackManager.repeatMode > 0,
-                    onClick = { playbackManager.toggleRepeatMode() }
-                )
+                Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                    OptionButton(
+                        icon = repeatIcon,
+                        label = repeatLabel,
+                        active = playbackManager.repeatMode > 0,
+                        onClick = { playbackManager.toggleRepeatMode() }
+                    )
+                }
 
                 // Crossfade
-                OptionButton(
-                    icon = Icons.Default.Tune,
-                    label = stringResource(R.string.option_crossfade),
-                    active = playbackManager.isCrossfade,
-                    onClick = { playbackManager.toggleCrossfade() }
-                )
+                Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                    OptionButton(
+                        icon = Icons.Default.Tune,
+                        label = stringResource(R.string.option_crossfade),
+                        active = playbackManager.isCrossfade,
+                        onClick = { playbackManager.toggleCrossfade() }
+                    )
+                }
 
                 // Automix
-                OptionButton(
-                    icon = Icons.Default.AutoAwesome,
-                    label = stringResource(R.string.option_automix),
-                    active = playbackManager.isAutomix,
-                    onClick = { playbackManager.toggleAutomix() }
-                )
+                Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                    OptionButton(
+                        icon = Icons.Default.AutoAwesome,
+                        label = stringResource(R.string.option_automix),
+                        active = playbackManager.isAutomix,
+                        onClick = { playbackManager.toggleAutomix() }
+                    )
+                }
             }
 
             Row(
@@ -925,40 +926,53 @@ fun PlayerOptionsBottomSheet(
                     .padding(horizontal = 8.dp, vertical = 16.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
+                val context = LocalContext.current
                 // Timer
-                OptionButton(
-                    icon = Icons.Default.Timer,
-                    label = if (playbackManager.sleepTimerMinutes > 0) "${playbackManager.sleepTimerMinutes}m" else stringResource(R.string.option_timer),
-                    active = playbackManager.sleepTimerMinutes > 0,
-                    onClick = { playbackManager.toggleSleepTimer() }
-                )
+                Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                    OptionButton(
+                        icon = Icons.Default.Timer,
+                        label = if (playbackManager.sleepTimerMinutes > 0) "${playbackManager.sleepTimerMinutes}m" else stringResource(R.string.option_timer),
+                        active = playbackManager.sleepTimerMinutes > 0,
+                        onClick = { playbackManager.toggleSleepTimer() }
+                    )
+                }
 
                 // EQ
-                OptionButton(
-                    icon = Icons.Default.GraphicEq,
-                    label = stringResource(R.string.eq_title),
-                    active = playbackManager.isEqEnabled,
-                    onClick = { showEqSheet = true }
-                )
+                Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                    OptionButton(
+                        icon = Icons.Default.GraphicEq,
+                        label = stringResource(R.string.eq_title),
+                        active = playbackManager.isEqEnabled,
+                        onClick = {
+                            onDismiss()
+                            val intent = android.content.Intent(context, EqualizerActivity::class.java)
+                            context.startActivity(intent)
+                        }
+                    )
+                }
 
                 // Playlist
-                OptionButton(
-                    icon = Icons.AutoMirrored.Filled.PlaylistAdd,
-                    label = stringResource(R.string.add_to_playlist),
-                    active = false,
-                    onClick = {
-                        onDismiss()
-                        onAddToPlaylistClick()
-                    }
-                )
+                Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                    OptionButton(
+                        icon = Icons.AutoMirrored.Filled.PlaylistAdd,
+                        label = stringResource(R.string.add_to_playlist),
+                        active = false,
+                        onClick = {
+                            onDismiss()
+                            onAddToPlaylistClick()
+                        }
+                    )
+                }
 
                 // Waveform Visualizer
-                OptionButton(
-                    icon = Icons.Default.Audiotrack,
-                    label = stringResource(R.string.option_visualizer),
-                    active = playbackManager.isFullPlayerVisualizerEnabled || playbackManager.isMiniPlayerVisualizerEnabled,
-                    onClick = onShowVisualizerSettings
-                )
+                Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                    OptionButton(
+                        icon = Icons.Default.Audiotrack,
+                        label = stringResource(R.string.option_visualizer),
+                        active = playbackManager.isFullPlayerVisualizerEnabled || playbackManager.isMiniPlayerVisualizerEnabled,
+                        onClick = onShowVisualizerSettings
+                    )
+                }
             }
         }
     }

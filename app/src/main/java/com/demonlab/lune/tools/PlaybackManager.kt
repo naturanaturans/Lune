@@ -751,10 +751,28 @@ class PlaybackManager private constructor(private val context: Context) {
         isEqEnabled = !isEqEnabled
         settings.isEqEnabled = isEqEnabled
         musicService?.setEqEnabled(isEqEnabled)
-        // Clear preset badge when EQ is disabled
         if (!isEqEnabled) {
+            settings.lastEqPresetName = activeEqPresetName
+            settings.lastEqBandLevels = eqBandLevels.joinToString(",")
             activeEqPresetName = ""
             settings.activeEqPresetName = ""
+        } else {
+            val lastName = settings.lastEqPresetName
+            val lastLevels = settings.lastEqBandLevels
+            if (lastLevels.isNotBlank()) {
+                val levelList = lastLevels.split(",").mapNotNull { it.toShortOrNull() }
+                if (levelList.size == getEqNumberOfBands().toInt()) {
+                    for (i in levelList.indices) {
+                        musicService?.setEqBandLevel(i.toShort(), levelList[i])
+                    }
+                    eqBandLevels = levelList.toList()
+                    settings.eqBandLevels = eqBandLevels.joinToString(",")
+                }
+                activeEqPresetName = lastName
+                settings.activeEqPresetName = lastName
+            } else {
+                applyEqPreset(0)
+            }
         }
     }
 
@@ -810,6 +828,84 @@ class PlaybackManager private constructor(private val context: Context) {
             settings.activeEqPresetName = name
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    fun getSavedCustomPresets(): List<Pair<String, String>> {
+        val result = mutableListOf<Pair<String, String>>()
+        try {
+            val json = org.json.JSONArray(settings.customEqPresetsJson)
+            for (i in 0 until json.length()) {
+                val obj = json.getJSONObject(i)
+                result.add(obj.getString("name") to obj.getString("levels"))
+            }
+        } catch (_: Exception) {}
+        return result
+    }
+
+    fun saveCustomEqPreset(name: String) {
+        val levels = eqBandLevels.joinToString(",")
+        val presets = try {
+            org.json.JSONArray(settings.customEqPresetsJson)
+        } catch (_: Exception) {
+            org.json.JSONArray()
+        }
+        // Replace existing with same name or add new
+        var found = false
+        for (i in 0 until presets.length()) {
+            val obj = presets.getJSONObject(i)
+            if (obj.getString("name") == name) {
+                obj.put("levels", levels)
+                found = true
+                break
+            }
+        }
+        if (!found) {
+            val entry = org.json.JSONObject()
+            entry.put("name", name)
+            entry.put("levels", levels)
+            presets.put(entry)
+        }
+        settings.customEqPresetsJson = presets.toString()
+        activeEqPresetName = name
+        settings.activeEqPresetName = name
+    }
+
+    fun deleteCustomEqPreset(name: String) {
+        val presets = try {
+            org.json.JSONArray(settings.customEqPresetsJson)
+        } catch (_: Exception) {
+            org.json.JSONArray()
+        }
+        val updated = org.json.JSONArray()
+        for (i in 0 until presets.length()) {
+            val obj = presets.getJSONObject(i)
+            if (obj.getString("name") != name) {
+                updated.put(obj)
+            }
+        }
+        settings.customEqPresetsJson = updated.toString()
+        if (activeEqPresetName == name) {
+            applyEqPreset(0)
+        }
+    }
+
+    fun isCustomPreset(name: String?): Boolean {
+        if (name.isNullOrBlank()) return false
+        if (name == "Custom") return true
+        return getSavedCustomPresets().any { it.first == name }
+    }
+
+    fun applyCustomPreset(name: String, levels: String) {
+        val levelList = levels.split(",").mapNotNull { it.toShortOrNull() }
+        if (levelList.size == getEqNumberOfBands().toInt()) {
+            for (i in levelList.indices) {
+                musicService?.setEqBandLevel(i.toShort(), levelList[i])
+            }
+            eqBandLevels = levelList.toList()
+            settings.eqBandLevels = eqBandLevels.joinToString(",")
+            activeEqPresetName = name
+            settings.activeEqPresetName = name
         }
     }
 

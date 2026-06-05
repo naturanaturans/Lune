@@ -73,7 +73,6 @@ import com.demonlab.lune.ui.data.Album
 import com.demonlab.lune.ui.components.VinylRecordAsyncCover
 import com.demonlab.lune.ui.components.WaveformVisualizer
 import com.demonlab.lune.ui.sheets.AddToPlaylistDialog
-import com.demonlab.lune.ui.sheets.EqBottomSheet
 import com.demonlab.lune.ui.sheets.PlayerOptionsBottomSheet
 import com.demonlab.lune.ui.sheets.QueueBottomSheet
 import com.demonlab.lune.ui.sheets.VisualizerSettingsBottomSheet
@@ -302,7 +301,6 @@ fun FullPlayer(
     var showQueueSheet by remember { mutableStateOf(false) }
     var showOptionsSheet by remember { mutableStateOf(false) }
     var showAddToPlaylistInPlayer by remember { mutableStateOf(false) }
-    var showEqSheet by remember { mutableStateOf(false) }
     var showVolumeBar by remember { mutableStateOf(false) }
     var showSpeedBar by remember { mutableStateOf(false) }
     var showVisualizerSettings by remember { mutableStateOf(false) }
@@ -1108,7 +1106,10 @@ fun FullPlayer(
                                     } else {
                                         when (swipeUpAction) {
                                             1 -> showQueueSheet = true
-                                            2 -> showEqSheet = true
+                                            2 -> {
+                                                val eqIntent = android.content.Intent(context, com.demonlab.lune.ui.activities.EqualizerActivity::class.java)
+                                                context.startActivity(eqIntent)
+                                            }
                                             3 -> showAddToPlaylistInPlayer = true
                                             4 -> {
                                                 try {
@@ -1230,13 +1231,6 @@ fun FullPlayer(
                     }
                 )
             }
-        }
-
-        if (showEqSheet) {
-            EqBottomSheet(
-                playbackManager = playbackManager,
-                onDismiss = { showEqSheet = false }
-            )
         }
 
         if (showVisualizerSettings) {
