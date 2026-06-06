@@ -21,6 +21,7 @@ import coil.imageLoader
 import coil.request.ImageRequest
 import coil.request.SuccessResult
 import com.demonlab.lune.R
+import com.demonlab.lune.audio.BalanceEffect
 import com.demonlab.lune.audio.LoudnessEffect
 import com.demonlab.lune.audio.ReverbEffect
 import com.demonlab.lune.ui.activities.Lune
@@ -423,6 +424,7 @@ class MusicService : MediaBrowserServiceCompat() {
                 val sessionId = audioSessionId
                 setupAudioFx(sessionId, false)
                 setVolume(1f, 1f)
+                applyBalance(PlaybackManager.getInstance(applicationContext).balance)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     try {
                         val pm = PlaybackManager.getInstance(applicationContext)
@@ -611,6 +613,7 @@ class MusicService : MediaBrowserServiceCompat() {
                 secondaryVirtualizer = null
 
                 mediaPlayer?.setVolume(1f, 1f)
+                applyBalance(PlaybackManager.getInstance(applicationContext).balance)
                 
                 // Reconfigure the listener for the promoted player
                 mediaPlayer?.setOnCompletionListener {
@@ -1020,6 +1023,12 @@ class MusicService : MediaBrowserServiceCompat() {
 
     fun setReverbPreset(preset: Int) {
         reverbEffect?.setPreset(preset)
+    }
+
+    fun applyBalance(balance: Float) {
+        val (left, right) = BalanceEffect.volumesForBalance(balance)
+        mediaPlayer?.setVolume(left, right)
+        secondaryPlayer?.setVolume(left, right)
     }
 
     fun setLoudnessEnabled(enabled: Boolean) {

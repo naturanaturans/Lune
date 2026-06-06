@@ -4,5 +4,5 @@
 - Add new option in OnBoarding for folder filters
 - Add Chinese languaje
 - Improvement to the "BASS" and "Spacial Audio" options of the equalizer
-- 
+- New options in equalizer: Loudness, Balance, Reverd, Pitch
 - Minor changes and fixes

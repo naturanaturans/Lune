@@ -478,6 +478,62 @@ fun EqualizerScreen(onBack: () -> Unit) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            var balanceValue by remember { mutableStateOf(playbackManager.balance) }
+
+            LaunchedEffect(playbackManager.balance) {
+                balanceValue = playbackManager.balance
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    stringResource(R.string.balance_label),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        when {
+                            balanceValue < 0.45f -> "L"
+                            balanceValue > 0.55f -> "R"
+                            else -> "C"
+                        },
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.width(24.dp)
+                    )
+                    if (kotlin.math.abs(balanceValue - 0.5f) > 0.01f) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        IconButton(
+                            onClick = {
+                                balanceValue = 0.5f
+                                playbackManager.updateBalance(0.5f)
+                            },
+                            modifier = Modifier.size(36.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = stringResource(R.string.balance_reset),
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+                }
+            }
+            Slider(
+                value = balanceValue.coerceIn(0f, 1f),
+                onValueChange = {
+                    balanceValue = it
+                    playbackManager.updateBalance(it)
+                }
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             var pitchValue by remember { mutableStateOf(playbackManager.playbackPitch) }
 
             LaunchedEffect(playbackManager.playbackPitch) {

@@ -80,6 +80,8 @@ class PlaybackManager private constructor(private val context: Context) {
         private set
     var reverbPreset by mutableStateOf(settings.reverbPreset)
         private set
+    var balance by mutableStateOf(settings.balance)
+        private set
     var isLoudnessEnabled by mutableStateOf(settings.isLoudnessEnabled)
         private set
     var loudnessGain by mutableStateOf(settings.loudnessGain)
@@ -984,6 +986,12 @@ class PlaybackManager private constructor(private val context: Context) {
         reverbPreset = preset
         settings.reverbPreset = preset
         musicService?.setReverbPreset(preset)
+    }
+
+    fun updateBalance(balance: Float) {
+        this.balance = balance
+        settings.balance = balance
+        musicService?.applyBalance(balance)
     }
 
     fun toggleLoudness() {

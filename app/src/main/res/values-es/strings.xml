@@ -22,6 +22,8 @@
     <string name="spatial_audio_label">Audio Espacial</string>
     <string name="loudness_label">Sonoridad</string>
     <string name="reverb_label">Reverb</string>
+    <string name="balance_label">Balance</string>
+    <string name="balance_reset">Restablecer balance</string>
     <string name="pitch_label">Tono</string>
     <string name="pitch_reset">Restablecer tono</string>
     <string name="restore_defaults">Restaurar por defecto</string>

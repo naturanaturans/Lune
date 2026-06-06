@@ -22,6 +22,8 @@
     <string name="spatial_audio_label">Spatial Audio</string>
     <string name="loudness_label">Loudness</string>
     <string name="reverb_label">Reverb</string>
+    <string name="balance_label">Balance</string>
+    <string name="balance_reset">Reset balance</string>
     <string name="pitch_label">Pitch</string>
     <string name="pitch_reset">Reset pitch</string>
     <string name="restore_defaults">Restore defaults</string>
