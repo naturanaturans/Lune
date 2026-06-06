@@ -412,13 +412,13 @@ fun EqualizerScreen(onBack: () -> Unit) {
                 Text(
                     stringResource(R.string.pitch_label),
                     style = MaterialTheme.typography.titleMedium,
-                    color = if (isEnabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         "%.2fx".format(pitchValue),
                         style = MaterialTheme.typography.labelLarge,
-                        color = if (isEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.width(52.dp)
                     )
                     if (pitchValue != 1.0f) {
@@ -428,13 +428,12 @@ fun EqualizerScreen(onBack: () -> Unit) {
                                 pitchValue = 1.0f
                                 playbackManager.updatePitch(1.0f)
                             },
-                            enabled = isEnabled,
                             modifier = Modifier.size(36.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Refresh,
                                 contentDescription = stringResource(R.string.pitch_reset),
-                                tint = if (isEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(20.dp)
                             )
                         }
@@ -447,7 +446,6 @@ fun EqualizerScreen(onBack: () -> Unit) {
                     pitchValue = (it * 10f).roundToInt() / 10f
                     playbackManager.updatePitch(pitchValue)
                 },
-                enabled = isEnabled,
                 valueRange = 0.5f..2.0f,
                 steps = 14
             )
