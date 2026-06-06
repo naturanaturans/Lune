@@ -21,6 +21,7 @@ import coil.imageLoader
 import coil.request.ImageRequest
 import coil.request.SuccessResult
 import com.demonlab.lune.R
+import com.demonlab.lune.audio.LoudnessEffect
 import com.demonlab.lune.ui.activities.Lune
 import kotlinx.coroutines.*
 import android.media.audiofx.Equalizer
@@ -50,6 +51,8 @@ class MusicService : MediaBrowserServiceCompat() {
     internal var equalizer: Equalizer? = null
     internal var bassBoost: BassBoost? = null
     internal var virtualizer: Virtualizer? = null
+
+    internal var loudnessEffect: LoudnessEffect? = null
 
     private var secondaryEqualizer: Equalizer? = null
     private var secondaryBassBoost: BassBoost? = null
@@ -204,10 +207,12 @@ class MusicService : MediaBrowserServiceCompat() {
                 secondaryEqualizer?.release()
                 secondaryBassBoost?.release()
                 secondaryVirtualizer?.release()
+                loudnessEffect?.release(true)
             } else {
                 equalizer?.release()
                 bassBoost?.release()
                 virtualizer?.release()
+                loudnessEffect?.release(false)
             }
 
             val eq = Equalizer(0, sessionId).apply {
@@ -236,10 +241,15 @@ class MusicService : MediaBrowserServiceCompat() {
             }
 
             if (isSecondary) {
+                loudnessEffect?.setup(sessionId, true, settingsManager.isLoudnessEnabled, settingsManager.loudnessGain)
                 secondaryEqualizer = eq
                 secondaryBassBoost = bb
                 secondaryVirtualizer = virt
             } else {
+                val loud = LoudnessEffect().apply {
+                    setup(sessionId, false, settingsManager.isLoudnessEnabled, settingsManager.loudnessGain)
+                }
+                loudnessEffect = loud
                 equalizer = eq
                 bassBoost = bb
                 virtualizer = virt
@@ -578,10 +588,12 @@ class MusicService : MediaBrowserServiceCompat() {
                 equalizer?.release()
                 bassBoost?.release()
                 virtualizer?.release()
+                loudnessEffect?.release(false)
 
                 equalizer = secondaryEqualizer
                 bassBoost = secondaryBassBoost
                 virtualizer = secondaryVirtualizer
+                loudnessEffect?.handover()
 
                 secondaryEqualizer = null
                 secondaryBassBoost = null
@@ -959,6 +971,7 @@ class MusicService : MediaBrowserServiceCompat() {
         equalizer?.release()
         bassBoost?.release()
         virtualizer?.release()
+        loudnessEffect?.releaseAll()
         secondaryEqualizer?.release()
         secondaryBassBoost?.release()
         secondaryVirtualizer?.release()
@@ -991,6 +1004,14 @@ class MusicService : MediaBrowserServiceCompat() {
         if (bassBoost?.strengthSupported == true) {
             bassBoost?.setStrength(strength)
         }
+    }
+
+    fun setLoudnessEnabled(enabled: Boolean) {
+        loudnessEffect?.setEnabled(enabled)
+    }
+
+    fun setLoudnessGain(gain: Int) {
+        loudnessEffect?.setTargetGain(gain)
     }
 
     fun setSpatialAudioEnabled(enabled: Boolean) {

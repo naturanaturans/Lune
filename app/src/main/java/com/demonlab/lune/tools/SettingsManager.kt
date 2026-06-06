@@ -286,6 +286,14 @@ class SettingsManager(context: Context) {
         get() = prefs.getFloat("playback_pitch", 1.0f)
         set(value) = prefs.edit().putFloat("playback_pitch", value).apply()
 
+    var isLoudnessEnabled: Boolean
+        get() = prefs.getBoolean("is_loudness_enabled", false)
+        set(value) = prefs.edit().putBoolean("is_loudness_enabled", value).apply()
+
+    var loudnessGain: Int
+        get() = prefs.getInt("loudness_gain", 0)
+        set(value) = prefs.edit().putInt("loudness_gain", value).apply()
+
     fun getPlaylistShuffle(playlistId: Long): Boolean {
         return prefs.getBoolean("shuffle_playlist_$playlistId", false)
     }

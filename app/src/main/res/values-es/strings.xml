@@ -20,6 +20,7 @@
     <string name="eq_empty_hint">Reproduce una canción para configurar el Ecualizador</string>
     <string name="bass_label">EXTRA BASS</string>
     <string name="spatial_audio_label">Audio Espacial</string>
+    <string name="loudness_label">Sonoridad</string>
     <string name="pitch_label">Tono</string>
     <string name="pitch_reset">Restablecer tono</string>
     <string name="restore_defaults">Restaurar por defecto</string>

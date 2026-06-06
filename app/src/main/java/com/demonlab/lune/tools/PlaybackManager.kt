@@ -78,6 +78,10 @@ class PlaybackManager private constructor(private val context: Context) {
         private set
     var playbackPitch by mutableStateOf(settings.playbackPitch)
         private set
+    var isLoudnessEnabled by mutableStateOf(settings.isLoudnessEnabled)
+        private set
+    var loudnessGain by mutableStateOf(settings.loudnessGain)
+        private set
     var eqBandLevels by mutableStateOf(
         settings.eqBandLevels.split(",")
             .mapNotNull { it.toShortOrNull() }
@@ -972,6 +976,23 @@ class PlaybackManager private constructor(private val context: Context) {
         isSpatialAudioEnabled = !isSpatialAudioEnabled
         settings.isSpatialAudioEnabled = isSpatialAudioEnabled
         musicService?.setSpatialAudioEnabled(isSpatialAudioEnabled)
+    }
+
+    fun toggleLoudness() {
+        isLoudnessEnabled = !isLoudnessEnabled
+        settings.isLoudnessEnabled = isLoudnessEnabled
+        if (!isLoudnessEnabled) {
+            loudnessGain = 0
+            settings.loudnessGain = 0
+        }
+        musicService?.setLoudnessEnabled(isLoudnessEnabled)
+        musicService?.setLoudnessGain(loudnessGain)
+    }
+
+    fun updateLoudnessGain(gain: Int) {
+        loudnessGain = gain
+        settings.loudnessGain = gain
+        musicService?.setLoudnessGain(gain)
     }
 
     fun toggleSleepTimer() {

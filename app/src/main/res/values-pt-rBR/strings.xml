@@ -20,6 +20,7 @@
     <string name="eq_empty_hint">Toque uma música para configurar o Equalizador</string>
     <string name="bass_label">GRAVES EXTRA</string>
     <string name="spatial_audio_label">Áudio Espacial</string>
+    <string name="loudness_label">Sonoridade</string>
     <string name="pitch_label">Tom</string>
     <string name="pitch_reset">Redefinir tom</string>
     <string name="restore_defaults">Restaurar padrões</string>

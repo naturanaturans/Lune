@@ -20,6 +20,7 @@
     <string name="eq_empty_hint">Lancez une chanson pour configurer l’égaliseur</string>
     <string name="bass_label">EXTRA BASSES</string>
     <string name="spatial_audio_label">Audio Spatial</string>
+    <string name="loudness_label">Loudness</string>
     <string name="pitch_label">Hauteur</string>
     <string name="pitch_reset">Réinitialiser la hauteur</string>
     <string name="restore_defaults">Restaurer par défaut</string>

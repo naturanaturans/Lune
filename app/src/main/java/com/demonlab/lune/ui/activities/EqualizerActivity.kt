@@ -398,6 +398,55 @@ fun EqualizerScreen(onBack: () -> Unit) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            var loudnessGainValue by remember { mutableStateOf(playbackManager.loudnessGain) }
+
+            LaunchedEffect(playbackManager.loudnessGain) {
+                loudnessGainValue = playbackManager.loudnessGain
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    stringResource(R.string.loudness_label),
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        "${loudnessGainValue / 100}dB",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.width(48.dp)
+                    )
+                    Switch(
+                        checked = playbackManager.isLoudnessEnabled,
+                        onCheckedChange = { playbackManager.toggleLoudness() },
+                        thumbContent = {
+                            Icon(
+                                imageVector = if (playbackManager.isLoudnessEnabled) Icons.Default.Check else Icons.Default.Close,
+                                contentDescription = null,
+                                modifier = Modifier.size(SwitchDefaults.IconSize)
+                            )
+                        }
+                    )
+                }
+            }
+            if (playbackManager.isLoudnessEnabled) {
+                Slider(
+                    value = loudnessGainValue.toFloat().coerceIn(0f, 3000f),
+                    onValueChange = {
+                        loudnessGainValue = it.toInt()
+                        playbackManager.updateLoudnessGain(it.toInt())
+                    },
+                    valueRange = 0f..3000f,
+                    steps = 29
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             var pitchValue by remember { mutableStateOf(playbackManager.playbackPitch) }
 
             LaunchedEffect(playbackManager.playbackPitch) {
