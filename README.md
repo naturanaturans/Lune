@@ -63,11 +63,11 @@ height="40">](https://f-droid.org/es/packages/com.demonlab.lune/)
   - **Reverb**: Simulates different acoustic spaces around your audio — from a small Room to a large Concert Hall. Built on `EnvironmentalReverb` (API 31+) with `PresetReverb` fallback on older devices. Six environments available: Room, Hall, Plate, Stage, Arena, and Cathedral. Works independently of the equalizer.
   - **Pitch**: Changes the playback speed and pitch from 0.5x (slow, deep) to 2.0x (fast, high). Speed and pitch move together via Android's `PlaybackParams`. Useful for voice study, instrumental practice, or just having fun with songs.
   - **Dynamics Processor**: Compresses the dynamic range — the gap between the quietest and loudest parts. Five presets:
-    - *Light* (1.5:1 ratio, gentle smoothing)
-    - *Medium* (3:1 ratio, general purpose)
-    - *Strong* (5:1 ratio, heavy compression with limiting)
-    - *Night* (8:1 ratio, aggressive compression + limiter — ideal for late-night listening without disturbing others)
-    Uses Android's `DynamicsProcessing` with multi-band compression (MBC) and a hard limiter. Independent of the EQ.
+    - _Light_ (1.5:1 ratio, gentle smoothing)
+    - _Medium_ (3:1 ratio, general purpose)
+    - _Strong_ (5:1 ratio, heavy compression with limiting)
+    - _Night_ (8:1 ratio, aggressive compression + limiter — ideal for late-night listening without disturbing others)
+      Uses Android's `DynamicsProcessing` with multi-band compression (MBC) and a hard limiter. Independent of the EQ.
 - **Vizulizer**: Bar display that moves to the rhythm of the music.
 - **Sample button theme**: A simple button that allows you to change the application's light or dark mode (includes automatic mode, taking the system mode).
 - **HI-FI audio**: The application supports audio in HI-FI formats.
@@ -96,6 +96,8 @@ height="40">](https://f-droid.org/es/packages/com.demonlab.lune/)
   <img src="readme-res/11.png" width="140">
   <img src="readme-res/12.png" width="140">
   <img src="readme-res/13.png" width="140">
+  <img src="readme-res/14.png" width="140">
+  <img src="readme-res/15.png" width="140">
 </p>
 
 ## 🛠 Build Requirements
