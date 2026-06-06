@@ -22,6 +22,7 @@ import coil.request.ImageRequest
 import coil.request.SuccessResult
 import com.demonlab.lune.R
 import com.demonlab.lune.audio.BalanceEffect
+import com.demonlab.lune.audio.DynamicsEffect
 import com.demonlab.lune.audio.LoudnessEffect
 import com.demonlab.lune.audio.ReverbEffect
 import com.demonlab.lune.ui.activities.Lune
@@ -56,6 +57,7 @@ class MusicService : MediaBrowserServiceCompat() {
 
     internal var loudnessEffect: LoudnessEffect? = null
     internal var reverbEffect: ReverbEffect? = null
+    internal var dynamicsEffect: DynamicsEffect? = null
 
     private var secondaryEqualizer: Equalizer? = null
     private var secondaryBassBoost: BassBoost? = null
@@ -212,12 +214,14 @@ class MusicService : MediaBrowserServiceCompat() {
                 secondaryVirtualizer?.release()
                 loudnessEffect?.release(true)
                 reverbEffect?.release(true)
+                dynamicsEffect?.release(true)
             } else {
                 equalizer?.release()
                 bassBoost?.release()
                 virtualizer?.release()
                 loudnessEffect?.release(false)
                 reverbEffect?.release(false)
+                dynamicsEffect?.release(false)
             }
 
             val eq = Equalizer(0, sessionId).apply {
@@ -248,6 +252,7 @@ class MusicService : MediaBrowserServiceCompat() {
             if (isSecondary) {
                 loudnessEffect?.setup(sessionId, true, settingsManager.isLoudnessEnabled, settingsManager.loudnessGain)
                 reverbEffect?.setup(sessionId, true, settingsManager.reverbPreset)
+                dynamicsEffect?.setup(sessionId, true, settingsManager.dynamicsPreset)
                 secondaryEqualizer = eq
                 secondaryBassBoost = bb
                 secondaryVirtualizer = virt
@@ -260,6 +265,10 @@ class MusicService : MediaBrowserServiceCompat() {
                     setup(sessionId, false, settingsManager.reverbPreset)
                 }
                 reverbEffect = rev
+                val dyn = DynamicsEffect().apply {
+                    setup(sessionId, false, settingsManager.dynamicsPreset)
+                }
+                dynamicsEffect = dyn
                 equalizer = eq
                 bassBoost = bb
                 virtualizer = virt
@@ -601,12 +610,14 @@ class MusicService : MediaBrowserServiceCompat() {
                 virtualizer?.release()
                 loudnessEffect?.release(false)
                 reverbEffect?.release(false)
+                dynamicsEffect?.release(false)
 
                 equalizer = secondaryEqualizer
                 bassBoost = secondaryBassBoost
                 virtualizer = secondaryVirtualizer
                 loudnessEffect?.handover()
                 reverbEffect?.handover()
+                dynamicsEffect?.handover()
 
                 secondaryEqualizer = null
                 secondaryBassBoost = null
@@ -987,6 +998,7 @@ class MusicService : MediaBrowserServiceCompat() {
         virtualizer?.release()
         loudnessEffect?.releaseAll()
         reverbEffect?.releaseAll()
+        dynamicsEffect?.releaseAll()
         secondaryEqualizer?.release()
         secondaryBassBoost?.release()
         secondaryVirtualizer?.release()
@@ -1023,6 +1035,10 @@ class MusicService : MediaBrowserServiceCompat() {
 
     fun setReverbPreset(preset: Int) {
         reverbEffect?.setPreset(preset)
+    }
+
+    fun setDynamicsPreset(preset: Int) {
+        dynamicsEffect?.setPreset(preset)
     }
 
     fun applyBalance(balance: Float) {

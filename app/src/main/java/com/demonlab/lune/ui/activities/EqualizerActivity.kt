@@ -534,6 +534,37 @@ fun EqualizerScreen(onBack: () -> Unit) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            val dynamicsNames = listOf("None", "Light", "Medium", "Strong", "Night")
+            val dynamicsValues = listOf(0, 1, 2, 3, 4)
+            var currentDynamics by remember { mutableStateOf(playbackManager.dynamicsPreset) }
+
+            LaunchedEffect(playbackManager.dynamicsPreset) {
+                currentDynamics = playbackManager.dynamicsPreset
+            }
+
+            Text(
+                stringResource(R.string.dynamics_label),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                items(dynamicsNames.size) { index ->
+                    val isActive = currentDynamics == dynamicsValues[index]
+                    FilterChip(
+                        selected = isActive,
+                        onClick = {
+                            currentDynamics = dynamicsValues[index]
+                            playbackManager.updateDynamicsPreset(dynamicsValues[index])
+                        },
+                        label = { Text(dynamicsNames[index]) },
+                        border = null
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             var pitchValue by remember { mutableStateOf(playbackManager.playbackPitch) }
 
             LaunchedEffect(playbackManager.playbackPitch) {

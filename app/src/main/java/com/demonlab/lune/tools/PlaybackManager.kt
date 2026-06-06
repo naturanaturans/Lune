@@ -82,6 +82,8 @@ class PlaybackManager private constructor(private val context: Context) {
         private set
     var balance by mutableStateOf(settings.balance)
         private set
+    var dynamicsPreset by mutableStateOf(settings.dynamicsPreset)
+        private set
     var isLoudnessEnabled by mutableStateOf(settings.isLoudnessEnabled)
         private set
     var loudnessGain by mutableStateOf(settings.loudnessGain)
@@ -992,6 +994,12 @@ class PlaybackManager private constructor(private val context: Context) {
         this.balance = balance
         settings.balance = balance
         musicService?.applyBalance(balance)
+    }
+
+    fun updateDynamicsPreset(preset: Int) {
+        dynamicsPreset = preset
+        settings.dynamicsPreset = preset
+        musicService?.setDynamicsPreset(preset)
     }
 
     fun toggleLoudness() {

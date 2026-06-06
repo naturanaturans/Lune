@@ -24,6 +24,7 @@
     <string name="reverb_label">混响</string>
     <string name="balance_label">平衡</string>
     <string name="balance_reset">重置平衡</string>
+    <string name="dynamics_label">动态</string>
     <string name="pitch_label">音调</string>
     <string name="pitch_reset">重置音调</string>
     <string name="restore_defaults">恢复默认</string>

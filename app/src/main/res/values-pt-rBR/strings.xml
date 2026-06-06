@@ -24,6 +24,7 @@
     <string name="reverb_label">Reverb</string>
     <string name="balance_label">Balance</string>
     <string name="balance_reset">Redefinir balanço</string>
+    <string name="dynamics_label">Dinâmica</string>
     <string name="pitch_label">Tom</string>
     <string name="pitch_reset">Redefinir tom</string>
     <string name="restore_defaults">Restaurar padrões</string>
