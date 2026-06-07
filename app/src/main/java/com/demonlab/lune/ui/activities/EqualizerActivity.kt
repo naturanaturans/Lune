@@ -30,7 +30,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.demonlab.lune.R
-import kotlin.math.roundToInt
 import com.demonlab.lune.tools.PlaybackManager
 import com.demonlab.lune.tools.SettingsManager
 import com.demonlab.lune.ui.theme.LuneTheme
@@ -610,11 +609,10 @@ fun EqualizerScreen(onBack: () -> Unit) {
             Slider(
                 value = pitchValue.coerceIn(0.5f, 2.0f),
                 onValueChange = {
-                    pitchValue = (it * 10f).roundToInt() / 10f
+                    pitchValue = it
                     playbackManager.updatePitch(pitchValue)
                 },
-                valueRange = 0.5f..2.0f,
-                steps = 14
+                valueRange = 0.5f..2.0f
             )
 
             Spacer(modifier = Modifier.height(32.dp))
