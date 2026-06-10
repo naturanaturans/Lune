@@ -377,10 +377,18 @@ fun PlaylistDetailView(
                 onDismiss = { showAddSongsDialog = false },
                 onSave = { toAdd, toRemove ->
                     if (toAdd.isNotEmpty()) {
-                        viewModel.addSongsToPlaylist(playlist.id, toAdd)
+                        viewModel.addSongsToPlaylist(playlist.id, toAdd) {
+                            if (playbackManager.activePlaylistId == playlist.id) {
+                                playbackManager.refreshActivePlaylist(viewModel.getSongsForPlaylistSync(playlist.id))
+                            }
+                        }
                     }
                     if (toRemove.isNotEmpty()) {
-                        viewModel.removeSongsFromPlaylist(playlist.id, toRemove)
+                        viewModel.removeSongsFromPlaylist(playlist.id, toRemove) {
+                            if (playbackManager.activePlaylistId == playlist.id) {
+                                playbackManager.refreshActivePlaylist(viewModel.getSongsForPlaylistSync(playlist.id))
+                            }
+                        }
                     }
                     showAddSongsDialog = false
                 }

@@ -185,6 +185,15 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    private suspend fun awaitLoadPlaylists() {
+        val (newPlaylists, newMappings) = withContext(Dispatchers.IO) {
+            val db = com.demonlab.lune.data.MusicDatabase.getDatabase(getApplication())
+            Pair(db.playlistDao().getAllPlaylists(), db.playlistDao().getAllPlaylistMappings())
+        }
+        playlists = newPlaylists
+        playlistMappings = newMappings
+    }
+
     fun addSongToPlaylist(playlistId: Long, songId: Long, onComplete: (() -> Unit)? = null) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -192,7 +201,7 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
                     com.demonlab.lune.data.PlaylistSong(playlistId, songId)
                 )
             }
-            loadPlaylists()
+            awaitLoadPlaylists()
             onComplete?.invoke()
         }
     }
@@ -204,7 +213,7 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
                 val playlistSongs = songIds.map { com.demonlab.lune.data.PlaylistSong(playlistId, it) }
                 db.playlistDao().addSongsToPlaylist(playlistSongs)
             }
-            loadPlaylists()
+            awaitLoadPlaylists()
             onComplete?.invoke()
         }
     }
@@ -214,7 +223,7 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
                 val db = com.demonlab.lune.data.MusicDatabase.getDatabase(getApplication())
                 db.playlistDao().removeSongsFromPlaylist(playlistId, songIds)
             }
-            loadPlaylists()
+            awaitLoadPlaylists()
             onComplete?.invoke()
         }
     }
@@ -224,7 +233,7 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
             withContext(Dispatchers.IO) {
                 com.demonlab.lune.data.MusicDatabase.getDatabase(getApplication()).playlistDao().removeSongFromPlaylist(playlistId, songId)
             }
-            loadPlaylists()
+            awaitLoadPlaylists()
             onComplete?.invoke()
         }
     }

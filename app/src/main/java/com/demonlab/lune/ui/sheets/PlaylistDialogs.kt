@@ -238,6 +238,10 @@ fun AddToPlaylistDialog(
                                             viewModel.getPlaylistsContainingSong(song.id) {
                                                 containingPlaylistIds = it
                                                 playbackManager.checkPlaylistStatus()
+                                                if (playbackManager.activePlaylistId == playlist.id) {
+                                                    val updated = viewModel.getSongsForPlaylistSync(playlist.id)
+                                                    playbackManager.refreshActivePlaylist(updated)
+                                                }
                                                 onDismiss()
                                             }
                                         }
@@ -273,6 +277,10 @@ fun AddToPlaylistDialog(
                                                 viewModel.getPlaylistsContainingSong(song.id) {
                                                     containingPlaylistIds = it
                                                     playbackManager.checkPlaylistStatus()
+                                                    if (playbackManager.activePlaylistId == playlist.id) {
+                                                        val updated = viewModel.getSongsForPlaylistSync(playlist.id)
+                                                        playbackManager.refreshActivePlaylist(updated)
+                                                    }
                                                     onDismiss()
                                                 }
                                             }

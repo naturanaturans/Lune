@@ -83,6 +83,14 @@ class PlaybackManager private constructor(private val context: Context) {
         frontQueueInsertCount = 0
     }
 
+    fun refreshActivePlaylist(newSongs: List<Song>) {
+        if (activePlaylistId == null) return
+        activePlaylist = newSongs
+        if (isShuffle) {
+            updateShuffledQueue(keepCurrentFirst = true)
+        }
+    }
+
     fun savePlaybackState(wasPlaying: Boolean = isPlaying) {
         val pos = musicService?.currentPosition()?.toLong() ?: 0L
         playbackStateSaver.save(
