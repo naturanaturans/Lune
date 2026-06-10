@@ -199,6 +199,14 @@ class SettingsManager(context: Context) {
             prefs.edit().putBoolean("is_options_bar_visible", value).apply()
         }
 
+    private val _isMiniPlayerMinimized = mutableStateOf(prefs.getBoolean("is_mini_player_minimized", false))
+    var isMiniPlayerMinimized: Boolean
+        get() = _isMiniPlayerMinimized.value
+        set(value) {
+            _isMiniPlayerMinimized.value = value
+            prefs.edit().putBoolean("is_mini_player_minimized", value).apply()
+        }
+
     var isBlurEnabled: Boolean
         get() = prefs.getBoolean("is_blur_enabled", true)
         set(value) = prefs.edit().putBoolean("is_blur_enabled", value).apply()
