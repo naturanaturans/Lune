@@ -303,7 +303,6 @@ fun FullPlayer(
     var showAddToPlaylistInPlayer by remember { mutableStateOf(false) }
     var showVolumeBar by remember { mutableStateOf(false) }
     var showSpeedBar by remember { mutableStateOf(false) }
-    var showOptionsBar by remember { mutableStateOf(true) }
     var showVisualizerSettings by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
@@ -1006,7 +1005,7 @@ fun FullPlayer(
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        AnimatedVisibility(visible = showOptionsBar) {
+                        AnimatedVisibility(visible = settingsManager.isOptionsBarVisible) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -1086,12 +1085,12 @@ fun FullPlayer(
                         }
                         Spacer(modifier = Modifier.height(4.dp))
                         IconButton(
-                            onClick = { showOptionsBar = !showOptionsBar },
+                            onClick = { settingsManager.isOptionsBarVisible = !settingsManager.isOptionsBarVisible },
                             modifier = Modifier.size(32.dp)
                         ) {
                             Icon(
-                                imageVector = if (showOptionsBar) Icons.Default.KeyboardArrowDown else Icons.Default.KeyboardArrowUp,
-                                contentDescription = if (showOptionsBar) stringResource(R.string.hide_options) else stringResource(R.string.show_options),
+                                imageVector = if (settingsManager.isOptionsBarVisible) Icons.Default.KeyboardArrowDown else Icons.Default.KeyboardArrowUp,
+                                contentDescription = if (settingsManager.isOptionsBarVisible) stringResource(R.string.hide_options) else stringResource(R.string.show_options),
                                 tint = if (useBlurControls) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(24.dp)
                             )

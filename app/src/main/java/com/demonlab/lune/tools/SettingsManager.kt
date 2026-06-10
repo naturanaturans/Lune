@@ -191,6 +191,14 @@ class SettingsManager(context: Context) {
             prefs.edit().putBoolean("is_bitrate_on_player", value).apply()
         }
 
+    private val _isOptionsBarVisible = mutableStateOf(prefs.getBoolean("is_options_bar_visible", true))
+    var isOptionsBarVisible: Boolean
+        get() = _isOptionsBarVisible.value
+        set(value) {
+            _isOptionsBarVisible.value = value
+            prefs.edit().putBoolean("is_options_bar_visible", value).apply()
+        }
+
     var isBlurEnabled: Boolean
         get() = prefs.getBoolean("is_blur_enabled", true)
         set(value) = prefs.edit().putBoolean("is_blur_enabled", value).apply()
