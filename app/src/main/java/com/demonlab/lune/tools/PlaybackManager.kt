@@ -30,6 +30,9 @@ class PlaybackManager private constructor(private val context: Context) {
     private var musicService: MusicService? = null
     private var isBound = false
     private var pendingPlaySong: Song? = null
+    private var pendingRestoreSong: Song? = null
+    private var pendingRestorePosition: Long = 0L
+    private var pendingRestorePlay: Boolean = false
     var currentSong by mutableStateOf<Song?>(null)
         private set
     var isPlaying by mutableStateOf(false)
@@ -70,8 +73,93 @@ class PlaybackManager private constructor(private val context: Context) {
     private var frontQueueInsertCount = 0
     private var bassBoostOffset: Short = 0
 
+    val playbackStateSaver = PlaybackStateSaver(
+        context.getSharedPreferences("lune_state", Context.MODE_PRIVATE)
+    )
+    var stateRestored by mutableStateOf(false)
+        private set
+
     fun resetQueueCounts() {
         frontQueueInsertCount = 0
+    }
+
+    fun savePlaybackState(wasPlaying: Boolean = isPlaying) {
+        val pos = musicService?.currentPosition()?.toLong() ?: 0L
+        playbackStateSaver.save(
+            SavedPlaybackState(
+                currentSongId = currentSong?.id ?: -1L,
+                playbackPositionMs = pos,
+                queueIds = activePlaylist.map { it.id },
+                playlistId = activePlaylistId,
+                playlistName = activePlaylistName,
+                playlistCategory = activeCategory,
+                shuffledIndices = if (isShuffle) shuffledIndices else emptyList(),
+                shufflePosition = if (isShuffle) currentShufflePosition else -1,
+                frontQueueInsertCount = frontQueueInsertCount,
+                wasPlaying = wasPlaying,
+                queueSections = queueSections
+            )
+        )
+    }
+
+    fun restorePlaybackState(songs: List<Song>) {
+        val saved = playbackStateSaver.restore() ?: run {
+            stateRestored = true
+            return
+        }
+        if (saved.currentSongId == -1L || saved.queueIds.isEmpty()) {
+            stateRestored = true
+            return
+        }
+        val restoredSongs = saved.queueIds.mapNotNull { id -> songs.find { it.id == id } }
+        if (restoredSongs.isEmpty()) {
+            stateRestored = true
+            return
+        }
+        val restoredCurrent = restoredSongs.find { it.id == saved.currentSongId }
+            ?: restoredSongs.first()
+
+        // Read shuffle preference for this playlist
+        val plId = saved.playlistId
+        val shuffle = if (plId != null) settings.getPlaylistShuffle(plId) else settings.isShuffle
+
+        currentSong = restoredCurrent
+        activePlaylist = restoredSongs
+        activePlaylistId = saved.playlistId
+        activePlaylistName = saved.playlistName
+        queueSections = saved.queueSections
+        if (saved.playlistCategory != null) {
+            activeCategory = saved.playlistCategory
+            settings.activeCategory = saved.playlistCategory
+        }
+
+        isShuffle = shuffle
+
+        if (shuffle && saved.shuffledIndices.isNotEmpty()) {
+            // Validate and restore shuffled indices
+            val validIndices = saved.shuffledIndices.filter { it < restoredSongs.size }
+            if (validIndices.isNotEmpty()) {
+                shuffledIndices = validIndices
+                currentShufflePosition = saved.shufflePosition.coerceIn(0, validIndices.size - 1)
+            } else {
+                updateShuffledQueue(keepCurrentFirst = false)
+            }
+        } else {
+            updateShuffledQueue(keepCurrentFirst = false)
+        }
+
+        frontQueueInsertCount = saved.frontQueueInsertCount
+        isQueueFinished = false
+        stateRestored = true
+
+        // Restore playback position (always paused — user taps play to resume)
+        if (musicService != null) {
+            musicService?.restorePlayback(restoredCurrent, saved.playbackPositionMs, andPlay = false)
+        } else {
+            pendingRestoreSong = restoredCurrent
+            pendingRestorePosition = saved.playbackPositionMs
+            pendingRestorePlay = false
+        }
     }
 
     var playbackSpeed by mutableStateOf(settings.playbackSpeed)
@@ -160,6 +248,10 @@ class PlaybackManager private constructor(private val context: Context) {
             pendingPlaySong?.let { 
                 musicService?.playSong(it)
                 pendingPlaySong = null
+            }
+            pendingRestoreSong?.let { song ->
+                musicService?.restorePlayback(song, pendingRestorePosition, pendingRestorePlay)
+                pendingRestoreSong = null
             }
         }
 
@@ -326,6 +418,8 @@ class PlaybackManager private constructor(private val context: Context) {
         
         // Record stat: New Play
         updatePlaybackStats("SONG", "SONG_${song.id}", incrementCount = true)
+
+        savePlaybackState(wasPlaying = true)
     }
 
     fun startVisualizer() {
@@ -467,6 +561,7 @@ class PlaybackManager private constructor(private val context: Context) {
                     // Natural end of queue: show Play icon and reset progress
                     isPlaying = false
                     isQueueFinished = true
+                    playbackStateSaver.clear()
                     musicService?.resetPlayerProgress()
                     return
                 }
@@ -486,6 +581,7 @@ class PlaybackManager private constructor(private val context: Context) {
                 // Natural end of queue: show Play icon and reset progress
                 isPlaying = false
                 isQueueFinished = true
+                playbackStateSaver.clear()
                 musicService?.resetPlayerProgress()
                 return
             }
@@ -590,6 +686,7 @@ class PlaybackManager private constructor(private val context: Context) {
     }
 
     fun pause() {
+        savePlaybackState(wasPlaying = false)
         flushPendingStats()
         isPlaying = false
         musicService?.pause()

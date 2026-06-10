@@ -268,6 +268,13 @@ class Lune : AppCompatActivity() {
             LaunchedEffect(rawAllSongs) {
                 hiddenFolders.value = settingsManager.hiddenFolders
             }
+
+            // Restore playback state once songs are loaded
+            LaunchedEffect(musicViewModel.allSongs) {
+                if (musicViewModel.allSongs.isNotEmpty() && !playbackManager.stateRestored) {
+                    playbackManager.restorePlaybackState(musicViewModel.allSongs)
+                }
+            }
             
             val currentSong = playbackManager.currentSong
             val isPlaying = playbackManager.isPlaying
@@ -335,6 +342,9 @@ class Lune : AppCompatActivity() {
             val lifecycleOwner = LocalLifecycleOwner.current
             DisposableEffect(lifecycleOwner) {
                 val observer = LifecycleEventObserver { _, event ->
+                    if (event == Lifecycle.Event.ON_PAUSE) {
+                        playbackManager.savePlaybackState()
+                    }
                     if (event == Lifecycle.Event.ON_RESUME) {
                         useCustomColors = settingsManager.useCustomColors
                         customColorPalette = settingsManager.customColorPalette
@@ -360,8 +370,14 @@ class Lune : AppCompatActivity() {
             // Sync Progress
             LaunchedEffect(isPlaying) {
                 if (isPlaying) {
+                    var saveCounter = 0
                     while (isPlaying) {
                         playbackProgress = playbackManager.getProgress()
+                        saveCounter++
+                        if (saveCounter >= 10) { // Save position every ~5 seconds
+                            saveCounter = 0
+                            playbackManager.savePlaybackState(wasPlaying = true)
+                        }
                         kotlinx.coroutines.delay(500)
                     }
                 } else {

@@ -759,6 +759,61 @@ class MusicService : MediaBrowserServiceCompat() {
         }
     }
 
+    fun restorePlayback(song: Song, positionMs: Long, andPlay: Boolean) {
+        isCrossfading = false
+        PlaybackManager.getInstance(applicationContext).isTransitioning = false
+        monitorJob?.cancel()
+        requestAudioFocus()
+
+        mediaPlayer?.setOnCompletionListener(null)
+        mediaPlayer?.setOnErrorListener(null)
+        mediaPlayer?.release()
+        secondaryPlayer?.setOnCompletionListener(null)
+        secondaryPlayer?.setOnErrorListener(null)
+        secondaryPlayer?.release()
+        secondaryPlayer = null
+
+        mediaPlayer = MediaPlayer().apply {
+            setDataSource(applicationContext, song.uri)
+            setOnPreparedListener {
+                seekTo(positionMs.toInt())
+                if (andPlay) start()
+                val sessionId = audioSessionId
+                setupAudioFx(sessionId, false)
+                setVolume(1f, 1f)
+                applyBalance(PlaybackManager.getInstance(applicationContext).balance)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    try {
+                        val pm = PlaybackManager.getInstance(applicationContext)
+                        val speed = pm.playbackSpeed
+                        val pitch = pm.playbackPitch
+                        if (speed != 1.0f || pitch != 1.0f) {
+                            val params = playbackParams
+                            params.speed = speed
+                            params.pitch = pitch
+                            playbackParams = params
+                        }
+                    } catch (e: Exception) {}
+                }
+                updatePlaybackState()
+                serviceScope.launch {
+                    val art = fetchAlbumArt(song)
+                    updateMetadata(song, art)
+                    showNotification(song, andPlay, art)
+                    PlaybackManager.getInstance(applicationContext).clearLyrics()
+                    extractLyrics(song)
+                }
+            }
+            setOnErrorListener { _, _, _ -> true }
+            prepareAsync()
+            setOnCompletionListener {
+                if (!isCrossfading) {
+                    PlaybackManager.getInstance(applicationContext).playNextFromService(true)
+                }
+            }
+        }
+    }
+
     private fun extractLyrics(song: Song) {
         Log.d("MusicService", "Extracting lyrics for: ${song.title}")
         serviceScope.launch(Dispatchers.IO) {
