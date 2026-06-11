@@ -34,6 +34,7 @@ import com.demonlab.lune.R
 import com.demonlab.lune.tools.PlaybackManager
 import com.demonlab.lune.tools.SettingsManager
 import com.demonlab.lune.ui.theme.LuneTheme
+import kotlinx.coroutines.delay
 
 class EqualizerActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -245,8 +246,8 @@ fun EqualizerScreen(onBack: () -> Unit) {
         ) {
             Spacer(modifier = Modifier.height(8.dp))
 
-            val numBands = playbackManager.getEqNumberOfBands()
-            val bandRange = playbackManager.getEqBandLevelRange()
+            val numBands = playbackManager.eqBandsCount
+            val bandRange = playbackManager.eqBandsRange
             val friendlyNames = listOf(
                 stringResource(R.string.band_sub_bass),
                 stringResource(R.string.band_bass),
@@ -254,6 +255,17 @@ fun EqualizerScreen(onBack: () -> Unit) {
                 stringResource(R.string.band_presence),
                 stringResource(R.string.band_brilliance)
             )
+
+            LaunchedEffect(playbackManager.isPlaying) {
+                playbackManager.refreshEqState()
+                if (playbackManager.isPlaying) {
+                    while (playbackManager.eqBandsCount <= 0 || playbackManager.eqBandsRange == null) {
+                        delay(200)
+                        playbackManager.refreshEqState()
+                        if (playbackManager.eqBandsCount > 0 && playbackManager.eqBandsRange != null) break
+                    }
+                }
+            }
 
             if (numBands > 0 && bandRange != null) {
                 val minLevel = bandRange[0]

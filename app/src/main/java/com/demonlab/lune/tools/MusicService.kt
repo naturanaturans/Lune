@@ -207,23 +207,23 @@ class MusicService : MediaBrowserServiceCompat() {
     }
 
     private fun setupAudioFx(sessionId: Int, isSecondary: Boolean = false) {
-        try {
-            if (isSecondary) {
-                secondaryEqualizer?.release()
-                secondaryBassBoost?.release()
-                secondaryVirtualizer?.release()
-                loudnessEffect?.release(true)
-                reverbEffect?.release(true)
-                dynamicsEffect?.release(true)
-            } else {
-                equalizer?.release()
-                bassBoost?.release()
-                virtualizer?.release()
-                loudnessEffect?.release(false)
-                reverbEffect?.release(false)
-                dynamicsEffect?.release(false)
-            }
+        if (isSecondary) {
+            secondaryEqualizer?.release()
+            secondaryBassBoost?.release()
+            secondaryVirtualizer?.release()
+            loudnessEffect?.release(true)
+            reverbEffect?.release(true)
+            dynamicsEffect?.release(true)
+        } else {
+            equalizer?.release()
+            bassBoost?.release()
+            virtualizer?.release()
+            loudnessEffect?.release(false)
+            reverbEffect?.release(false)
+            dynamicsEffect?.release(false)
+        }
 
+        try {
             val eq = Equalizer(0, sessionId).apply {
                 enabled = settingsManager.isEqEnabled
                 val storedBands = settingsManager.eqBandLevels.split(",").filter { it.isNotEmpty() }
@@ -235,27 +235,32 @@ class MusicService : MediaBrowserServiceCompat() {
                     }
                 }
             }
+            if (isSecondary) secondaryEqualizer = eq else equalizer = eq
+        } catch (e: Exception) { e.printStackTrace() }
 
+        try {
             val bb = BassBoost(0, sessionId).apply {
                 enabled = false
             }
+            if (isSecondary) secondaryBassBoost = bb else bassBoost = bb
+        } catch (e: Exception) { e.printStackTrace() }
 
+        try {
             val virt = Virtualizer(0, sessionId).apply {
                 enabled = settingsManager.isSpatialAudioEnabled
                 if (strengthSupported) {
-                    val s = 800.toShort()
-                    setStrength(s)
-                    currentSpatialStrength = s
+                    setStrength(800.toShort())
+                    currentSpatialStrength = 800.toShort()
                 }
             }
+            if (isSecondary) secondaryVirtualizer = virt else virtualizer = virt
+        } catch (e: Exception) { e.printStackTrace() }
 
+        try {
             if (isSecondary) {
                 loudnessEffect?.setup(sessionId, true, settingsManager.isLoudnessEnabled, settingsManager.loudnessGain)
                 reverbEffect?.setup(sessionId, true, settingsManager.reverbPreset)
                 dynamicsEffect?.setup(sessionId, true, settingsManager.dynamicsPreset)
-                secondaryEqualizer = eq
-                secondaryBassBoost = bb
-                secondaryVirtualizer = virt
             } else {
                 val loud = LoudnessEffect().apply {
                     setup(sessionId, false, settingsManager.isLoudnessEnabled, settingsManager.loudnessGain)
@@ -269,13 +274,8 @@ class MusicService : MediaBrowserServiceCompat() {
                     setup(sessionId, false, settingsManager.dynamicsPreset)
                 }
                 dynamicsEffect = dyn
-                equalizer = eq
-                bassBoost = bb
-                virtualizer = virt
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        } catch (e: Exception) { e.printStackTrace() }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -777,7 +777,8 @@ class MusicService : MediaBrowserServiceCompat() {
             setDataSource(applicationContext, song.uri)
             setOnPreparedListener {
                 seekTo(positionMs.toInt())
-                if (andPlay) start()
+                start()
+                if (!andPlay) pause()
                 val sessionId = audioSessionId
                 setupAudioFx(sessionId, false)
                 setVolume(1f, 1f)

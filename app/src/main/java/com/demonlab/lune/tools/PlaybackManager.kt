@@ -65,6 +65,10 @@ class PlaybackManager private constructor(private val context: Context) {
     
     var isEqEnabled by mutableStateOf(settings.isEqEnabled)
         private set
+    var eqBandsCount: Short by mutableStateOf(0)
+        private set
+    var eqBandsRange: ShortArray? by mutableStateOf(null)
+        private set
     var isBassBoostEnabled by mutableStateOf(settings.isBassBoostEnabled)
         private set
     var isSpatialAudioEnabled by mutableStateOf(settings.isSpatialAudioEnabled)
@@ -866,6 +870,11 @@ class PlaybackManager private constructor(private val context: Context) {
     fun getEqBandLevelRange(): ShortArray? = musicService?.equalizer?.bandLevelRange
     fun getEqCenterFreq(band: Short): Int = musicService?.equalizer?.getCenterFreq(band) ?: 0
     fun getEqBandLevel(band: Short): Short = musicService?.equalizer?.getBandLevel(band) ?: 0
+
+    fun refreshEqState() {
+        eqBandsCount = musicService?.equalizer?.numberOfBands ?: 0
+        eqBandsRange = musicService?.equalizer?.bandLevelRange
+    }
 
     fun toggleEq() {
         isEqEnabled = !isEqEnabled
