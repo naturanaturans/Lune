@@ -55,13 +55,13 @@
     <string name="tab_folders">Carpetas</string>
 
     <!-- Player Options -->
-    <string name="option_shuffle">Shuffle</string>
-    <string name="option_crossfade">Crossfade</string>
-    <string name="option_automix">Automix</string>
-    <string name="option_timer">Timer</string>
-    <string name="option_lyrics">Lyrics</string>
+    <string name="option_shuffle">Aleatorio</string>
+    <string name="option_crossfade">Transición</string>
+    <string name="option_automix">Mezcla automática</string>
+    <string name="option_timer">Temporizador</string>
+    <string name="option_lyrics">Letras</string>
     <string name="transition_mixing">Mezclando</string>
-    <string name="transition_crossfade">Crossfade</string>
+    <string name="transition_crossfade">Transición</string>
     <string name="unknown_artist">Artista desconocido</string>
     <string name="unknown_song">Canción desconocida</string>
 
@@ -119,7 +119,7 @@
     <string name="use_custom_colors_desc">Sobrescribe el color dinámico con colores preestablecidos</string>
     <string name="amoled_pitch_black">Pantalla AMOLED (Negro puro)</string>
     <string name="amoled_pitch_black_desc">Usa fondo negro puro en el modo oscuro</string>
-    <string name="media_player">Media Player</string>
+    <string name="media_player">Reproductor multimedia</string>
     <string name="haptic_vibration">Vibración óptica</string>
     <string name="haptic_vibration_desc">Vibración ligera al usar los controles del reproductor</string>
     <string name="song_info">Información de Canción</string>
@@ -128,7 +128,7 @@
     <string name="show_in_full_player">Mostrar en reproductor</string>
     <string name="show_options">Mostrar opciones</string>
     <string name="hide_options">Ocultar opciones</string>
-    <string name="cover_player">Cover player</string>
+    <string name="cover_player">Reproductor de carátula</string>
     <string name="cover_player_desc">Personaliza la forma, tamaño y rotación de la carátula</string>
     <string name="shape_default">Por defecto</string>
     <string name="shape_square">Cuadrada</string>
@@ -144,7 +144,7 @@
     <string name="circular_effects">Efectos circulares</string>
     <string name="cover_spin_desc">Gira la carátula de forma continua al reproducir</string>
     <string name="cover_vinyl_desc">Agrega un anillo con textura de disco de vinilo</string>
-    <string name="controls_player">Control player</string>
+    <string name="controls_player">Control del reproductor</string>
     <string name="controls_player_desc">Personaliza los botones anterior y siguiente</string>
     <string name="controls_preview">Vista previa de controles</string>
     <string name="controls_style_title">Estilo de botones</string>
@@ -172,7 +172,7 @@
     <string name="queue_up_next">Siguientes</string>
     <string name="option_visualizer">Visualizador</string>
     <string name="visualizer_full_player">Mostrar en Reproductor Grande</string>
-    <string name="visualizer_mini_player">Mostrar en Mini Player</string>
+    <string name="visualizer_mini_player">Mostrar en mini reproductor</string>
     <string name="credits">Créditos</string>
     <string name="credits_desc">Pruebas, sugerencias de diseño y logo</string>
     <string name="creator_desc">Creador y mantenedor de lune music player</string>
