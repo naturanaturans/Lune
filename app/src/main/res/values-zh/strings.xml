@@ -108,6 +108,13 @@
     <string name="song_deleted">歌曲已删除</string>
     <string name="edit_name">编辑名称</string>
     <string name="search">搜索</string>
+    <string name="search_filter">筛选结果</string>
+    <string name="search_filter_all">全部</string>
+    <string name="search_filter_playlist">播放列表</string>
+    <string name="search_filter_album">专辑</string>
+    <string name="search_filter_artist">歌手</string>
+    <string name="search_filter_folder">文件夹</string>
+    <string name="search_filter_cancel">取消</string>
     <string name="search_hint">搜索歌曲、艺术家或专辑...</string>
     <string name="delete_playlist">删除播放列表</string>
     <string name="delete_playlist_confirm">确定要删除此播放列表吗？</string>

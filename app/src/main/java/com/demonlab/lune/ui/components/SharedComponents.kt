@@ -272,6 +272,8 @@ fun AlbumsListHeader(
     albumCount: Int,
     viewStyle: Int,
     onToggleViewStyle: () -> Unit,
+    isAlbumView: Boolean,
+    onToggleAlbumView: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -283,13 +285,14 @@ fun AlbumsListHeader(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Surface(
+                onClick = onToggleAlbumView,
                 shape = RoundedCornerShape(12.dp),
                 color = MaterialTheme.colorScheme.secondaryContainer,
                 modifier = Modifier.size(44.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
-                        Icons.Default.Person,
+                        if (isAlbumView) Icons.Default.Album else Icons.Default.Person,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(24.dp)
@@ -299,7 +302,7 @@ fun AlbumsListHeader(
             Spacer(modifier = Modifier.width(12.dp))
             Column {
                 Text(
-                    text = stringResource(R.string.tab_albums),
+                    text = if (isAlbumView) stringResource(R.string.tab_albums_real) else stringResource(R.string.tab_artists),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface
@@ -312,19 +315,37 @@ fun AlbumsListHeader(
             }
         }
 
-        Surface(
-            onClick = onToggleViewStyle,
-            shape = CircleShape,
-            color = MaterialTheme.colorScheme.secondaryContainer,
-            modifier = Modifier.size(36.dp)
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Icon(
-                    if (viewStyle == 0) Icons.Default.ViewCarousel else Icons.Default.GridView,
-                    contentDescription = "Toggle View Style",
-                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                    modifier = Modifier.size(18.dp)
-                )
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Surface(
+                onClick = onToggleAlbumView,
+                shape = CircleShape,
+                color = if (isAlbumView) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer,
+                modifier = Modifier.size(36.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        if (isAlbumView) Icons.Default.Person else Icons.Default.Album,
+                        contentDescription = null,
+                        tint = if (isAlbumView) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondaryContainer,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
+
+            Surface(
+                onClick = onToggleViewStyle,
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                modifier = Modifier.size(36.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        if (viewStyle == 0) Icons.Default.ViewCarousel else Icons.Default.GridView,
+                        contentDescription = "Toggle View Style",
+                        tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
             }
         }
     }

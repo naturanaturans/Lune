@@ -538,6 +538,7 @@ fun MainScreen(
     val sTabFavorites = stringResource(R.string.tab_favorites)
     val sTabFolders = stringResource(R.string.tab_folders)
     val sTabAlbums = stringResource(R.string.tab_albums)
+    val sTabAlbumsReal = stringResource(R.string.tab_albums_real)
     val sTabPlaylists = stringResource(R.string.playlists)
 
     val visibleFolders = remember(allFolders, hiddenFolders.value) {
@@ -567,6 +568,7 @@ fun MainScreen(
     var showMenu by remember { mutableStateOf(false) }
     var selectedAlbum by remember { mutableStateOf<Album?>(null) }
     var selectedFolderItem by remember { mutableStateOf<String?>(null) }
+    var isAlbumView by remember { mutableStateOf(settingsManager.albumBrowseMode) }
 
     val visibleSongs = remember(rawAllSongs, hiddenFolders.value) {
         rawAllSongs.filter { !hiddenFolders.value.contains(it.folderName) }
@@ -604,20 +606,36 @@ fun MainScreen(
     }
 
     
-    val albums = remember(rawAllSongs, hiddenFolders.value) {
-        rawAllSongs.filter { !hiddenFolders.value.contains(it.folderName) }
-            .groupBy { it.artist }
-            .map { (artistName, songs) -> 
-                Album(
-                    id = artistName.hashCode().toLong(),
-                    name = artistName, 
-                    artist = "", 
-                    albumArtUri = songs.first().albumArtUri, 
-                    coverUrl = songs.first().coverUrl, 
-                    songs = songs.sortedWith(compareBy({ it.album }, { it.title }))
-                ) 
-            }
-            .sortedBy { it.name }
+    val albums = remember(rawAllSongs, hiddenFolders.value, isAlbumView) {
+        if (isAlbumView) {
+            rawAllSongs.filter { !hiddenFolders.value.contains(it.folderName) }
+                .groupBy { it.album }
+                .map { (albumName, songs) ->
+                    Album(
+                        id = albumName.hashCode().toLong(),
+                        name = albumName,
+                        artist = songs.first().artist,
+                        albumArtUri = songs.first().albumArtUri,
+                        coverUrl = songs.first().coverUrl,
+                        songs = songs.sortedBy { it.title }
+                    )
+                }
+                .sortedBy { it.name }
+        } else {
+            rawAllSongs.filter { !hiddenFolders.value.contains(it.folderName) }
+                .groupBy { it.artist }
+                .map { (artistName, songs) -> 
+                    Album(
+                        id = artistName.hashCode().toLong(),
+                        name = artistName, 
+                        artist = "", 
+                        albumArtUri = songs.first().albumArtUri, 
+                        coverUrl = songs.first().coverUrl, 
+                        songs = songs.sortedWith(compareBy({ it.album }, { it.title }))
+                    ) 
+                }
+                .sortedBy { it.name }
+        }
     }
 
     LaunchedEffect(selectedFolder) {
@@ -935,7 +953,7 @@ fun MainScreen(
                                         "RESUME" -> sTabResume
                                         "ALL" -> sTabAll
                                         "FAVORITES" -> sTabFavorites
-                                        "ALBUMS" -> sTabAlbums
+                                        "ALBUMS" -> if (isAlbumView) sTabAlbumsReal else sTabAlbums
                                         "PLAYLISTS" -> sTabPlaylists
                                         "FOLDERS" -> sTabFolders
                                         else -> folder
@@ -1001,7 +1019,7 @@ fun MainScreen(
                                                         modifier = Modifier.size(20.dp)
                                                     )
                                                     "ALBUMS" -> Icon(
-                                                        imageVector = Icons.Default.Person,
+                                                        imageVector = if (isAlbumView) Icons.Default.Album else Icons.Default.Person,
                                                         contentDescription = label,
                                                         tint = iconTint,
                                                         modifier = Modifier.size(20.dp)
@@ -1168,6 +1186,12 @@ fun MainScreen(
                                             val newStyle = if (viewStyle == 0) 1 else 0
                                             viewStyle = newStyle
                                             settingsManager.albumViewStyle = newStyle
+                                        },
+                                        isAlbumView = isAlbumView,
+                                        onToggleAlbumView = {
+                                            val newMode = !isAlbumView
+                                            isAlbumView = newMode
+                                            settingsManager.albumBrowseMode = newMode
                                         }
                                     )
                                 }
@@ -1178,14 +1202,14 @@ fun MainScreen(
                                             albums = albums,
                                             onAlbumClick = { selectedAlbum = it },
                                             bottomPadding = bottomPadding,
-                                            activePlaylistId = currentSong?.artist?.hashCode()?.toLong()
+                                            activePlaylistId = if (isAlbumView) currentSong?.album?.hashCode()?.toLong() else currentSong?.artist?.hashCode()?.toLong()
                                         )
                                     } else {
                                         AlbumStackedCarousel(
                                             albums = albums,
                                             onAlbumClick = { selectedAlbum = it },
                                             bottomPadding = bottomPadding,
-                                            activePlaylistId = currentSong?.artist?.hashCode()?.toLong()
+                                            activePlaylistId = if (isAlbumView) currentSong?.album?.hashCode()?.toLong() else currentSong?.artist?.hashCode()?.toLong()
                                         )
                                     }
                                 }
@@ -1528,8 +1552,9 @@ fun MainScreen(
             }
             
             lastAlbum?.let { albumRender ->
-                val albumSongs = remember(albumRender.name, visibleSongs) {
-                    visibleSongs.filter { it.artist == albumRender.name }
+                val albumSongs = remember(albumRender.name, visibleSongs, isAlbumView) {
+                    if (isAlbumView) visibleSongs.filter { it.album == albumRender.name }
+                    else visibleSongs.filter { it.artist == albumRender.name }
                 }
                 AlbumDetailView(
                     album = albumRender,
@@ -1789,6 +1814,7 @@ fun MainScreen(
             },
             onNavigateToAlbum = { album ->
                 selectedAlbum = album
+                isAlbumView = album.artist.isNotEmpty()
                 showSearchScreen = false
                 onSelectedFolderChange("ALBUMS")
             },
@@ -1835,12 +1861,12 @@ fun MainScreen(
                         }
                     )
                 },
-                onSave = { updatedTitle, updatedArtist, updatedCoverUri ->
+                onSave = { updatedTitle, updatedArtist, updatedAlbum, updatedCoverUri ->
                     musicViewModel.updateMetadata(
                         song = song,
                         title = updatedTitle,
                         artist = updatedArtist,
-                        album = song.album,
+                        album = updatedAlbum,
                         genre = song.genre,
                         coverUri = updatedCoverUri,
                         onSuccess = {

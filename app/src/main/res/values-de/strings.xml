@@ -108,6 +108,13 @@
     <string name="song_deleted">Song gelöscht</string>
     <string name="edit_name">Namen bearbeiten</string>
     <string name="search">Suchen</string>
+    <string name="search_filter">Ergebnisse filtern</string>
+    <string name="search_filter_all">Alle</string>
+    <string name="search_filter_playlist">Playlist</string>
+    <string name="search_filter_album">Album</string>
+    <string name="search_filter_artist">Künstler</string>
+    <string name="search_filter_folder">Ordner</string>
+    <string name="search_filter_cancel">Abbrechen</string>
     <string name="search_hint">Songs, Künstler oder Alben suchen...</string>
     <string name="delete_playlist">Playlist löschen</string>
     <string name="delete_playlist_confirm">Bist du sicher, dass du diese Playlist löschen möchtest?</string>

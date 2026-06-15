@@ -553,6 +553,19 @@ fun AlbumDetailView(
                             modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)
                         )
 
+                        if (album.artist.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = album.artist,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)
+                            )
+                        }
+
                         Spacer(modifier = Modifier.height(16.dp))
                         
                         Surface(
@@ -682,7 +695,11 @@ fun AlbumDetailView(
                             modifier = Modifier.fillParentMaxHeight(0.6f).fillMaxWidth(),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("No hay canciones de este artista", style = MaterialTheme.typography.bodyLarge)
+                            Text(
+                                if (album.artist.isNotEmpty()) "No hay canciones de este álbum"
+                                else "No hay canciones de este artista",
+                                style = MaterialTheme.typography.bodyLarge
+                            )
                         }
                     }
                 } else {

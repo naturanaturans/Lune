@@ -108,6 +108,13 @@
     <string name="song_deleted">Música excluída</string>
     <string name="edit_name">Editar Nome</string>
     <string name="search">Pesquisar</string>
+    <string name="search_filter">Filtrar resultados</string>
+    <string name="search_filter_all">Todos</string>
+    <string name="search_filter_playlist">Playlist</string>
+    <string name="search_filter_album">Álbum</string>
+    <string name="search_filter_artist">Artista</string>
+    <string name="search_filter_folder">Pasta</string>
+    <string name="search_filter_cancel">Cancelar</string>
     <string name="search_hint">Pesquisar músicas, artistas ou álbuns...</string>
     <string name="delete_playlist">Excluir Playlist</string>
     <string name="delete_playlist_confirm">Tem certeza que deseja excluir esta playlist?</string>
