@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
+import com.demonlab.lune.ui.components.BouncySwitch
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -373,7 +374,7 @@ fun EqualizerScreen(onBack: () -> Unit) {
                     style = MaterialTheme.typography.titleMedium,
                     color = if (isEnabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Switch(
+                BouncySwitch(
                     checked = playbackManager.isBassBoostEnabled,
                     onCheckedChange = { playbackManager.toggleBassBoost() },
                     enabled = isEnabled,
@@ -395,7 +396,7 @@ fun EqualizerScreen(onBack: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(stringResource(R.string.spatial_audio_label), style = MaterialTheme.typography.titleMedium)
-                Switch(
+                BouncySwitch(
                     checked = playbackManager.isSpatialAudioEnabled,
                     onCheckedChange = { playbackManager.toggleSpatialAudio() },
                     thumbContent = {
@@ -432,7 +433,7 @@ fun EqualizerScreen(onBack: () -> Unit) {
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.width(48.dp)
                     )
-                    Switch(
+                    BouncySwitch(
                         checked = playbackManager.isLoudnessEnabled,
                         onCheckedChange = { playbackManager.toggleLoudness() },
                         thumbContent = {

@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import androidx.compose.material3.*
+import com.demonlab.lune.ui.components.BouncySwitch
 import androidx.compose.runtime.*
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -256,7 +257,7 @@ fun SettingsScreen(
                     icon = Icons.Default.MusicNote,
                     position = SectionPosition.FIRST,
                     trailingContent = {
-                        Switch(
+                        BouncySwitch(
                             checked = showHiFi,
                             onCheckedChange = {
                                 showHiFi = it

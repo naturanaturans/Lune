@@ -434,24 +434,24 @@ private fun parseLyrics(raw: String?): List<LyricsLine> {
     val wordLevelPattern = Pattern.compile("<(\\d{2}):(\\d{2})\\.(\\d{2,3})>")
     val labelPattern = Regex("^[A-Za-z0-9]+:\\s*")
     
-    val normalizedLines = raw.lines().map { line ->
+    val normalizedLines = raw.lines().mapNotNull { line ->
         val wMatcher = wordLevelPattern.matcher(line)
-        if (!wMatcher.find()) return@map line
-        
-        val min = wMatcher.group(1).toLong()
-        val sec = wMatcher.group(2).toLong()
-        val msPart = wMatcher.group(3)
+        if (!wMatcher.find()) return@mapNotNull line
+
+        val min = wMatcher.group(1)?.toLong() ?: return@mapNotNull null
+        val sec = wMatcher.group(2)?.toLong() ?: return@mapNotNull null
+        val msPart = wMatcher.group(3) ?: return@mapNotNull null
         val ms = when (msPart.length) {
             1 -> msPart.toLong() * 100
             2 -> msPart.toLong() * 10
             else -> msPart.toLong()
         }
         val totalMs = (min * 60 * 1000) + (sec * 1000) + ms
-        
+
         val textOnly = wMatcher.reset(line).replaceAll("").trim()
         val cleanText = textOnly.replaceFirst(labelPattern, "").trim()
-        if (cleanText.isEmpty()) return@map line
-        
+        if (cleanText.isEmpty()) return@mapNotNull null
+
         "[%02d:%02d.%02d]%s".format(
             totalMs / 60000, (totalMs % 60000) / 1000, (totalMs % 1000) / 10,
             cleanText

@@ -17,6 +17,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.QueueMusic
 import android.content.Intent
 import androidx.compose.material3.*
+import com.demonlab.lune.ui.components.BouncySwitch
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -225,7 +226,7 @@ fun CustomizationScreen(
                     icon = Icons.Default.ViewAgenda,
                     position = SectionPosition.MIDDLE,
                     trailingContent = {
-                        Switch(
+                        BouncySwitch(
                             checked = isSectionCustomizationEnabled,
                             onCheckedChange = { enabled ->
                                 isSectionCustomizationEnabled = enabled
@@ -303,7 +304,7 @@ fun CustomizationScreen(
                     icon = Icons.Default.Palette,
                     position = SectionPosition.MIDDLE,
                     trailingContent = {
-                        Switch(
+                        BouncySwitch(
                             checked = useCustomColors,
                             onCheckedChange = onCustomColorsChanged,
                             thumbContent = {
@@ -392,7 +393,7 @@ fun CustomizationScreen(
                     icon = Icons.Default.PhoneAndroid,
                     position = SectionPosition.LAST,
                     trailingContent = {
-                        Switch(
+                        BouncySwitch(
                             checked = useAmoledPitchBlack,
                             onCheckedChange = onAmoledChanged,
                             thumbContent = {
@@ -416,7 +417,7 @@ fun CustomizationScreen(
                     icon = androidx.compose.material.icons.Icons.Default.PhoneAndroid,
                     position = SectionPosition.FIRST,
                     trailingContent = {
-                        Switch(
+                        BouncySwitch(
                             checked = isHapticVibrationEnabled,
                             onCheckedChange = onHapticChanged,
                             thumbContent = {
@@ -483,7 +484,7 @@ fun CustomizationScreen(
                     icon = androidx.compose.material.icons.Icons.Default.AutoAwesome,
                     position = SectionPosition.MIDDLE,
                     trailingContent = {
-                        Switch(
+                        BouncySwitch(
                             checked = isCinematicEnabled,
                             onCheckedChange = onCinematicChanged,
                             thumbContent = {

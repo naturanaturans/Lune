@@ -29,6 +29,7 @@ import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
 import androidx.compose.material.icons.automirrored.filled.LastPage
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import com.demonlab.lune.ui.components.BouncySwitch
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -274,7 +275,7 @@ fun SortBottomSheet(
                             color = MaterialTheme.colorScheme.onSecondaryContainer,
                             modifier = Modifier.padding(end = 8.dp)
                         )
-                        Switch(
+                        BouncySwitch(
                             checked = isSortAscending,
                             onCheckedChange = {
                                 onSortSettingsChange(sortOption, it)
@@ -471,7 +472,7 @@ fun EqBottomSheet(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(stringResource(R.string.bass_label), style = MaterialTheme.typography.titleMedium)
-                Switch(
+                BouncySwitch(
                     checked = playbackManager.isBassBoostEnabled,
                     onCheckedChange = { playbackManager.toggleBassBoost() },
                     thumbContent = {
@@ -492,7 +493,7 @@ fun EqBottomSheet(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(stringResource(R.string.spatial_audio_label), style = MaterialTheme.typography.titleMedium)
-                Switch(
+                BouncySwitch(
                     checked = playbackManager.isSpatialAudioEnabled,
                     onCheckedChange = { playbackManager.toggleSpatialAudio() },
                     thumbContent = {
@@ -1017,7 +1018,7 @@ fun VisualizerSettingsBottomSheet(
             ListItem(
                 headlineContent = { Text(stringResource(R.string.visualizer_full_player)) },
                 trailingContent = {
-                    Switch(
+                    BouncySwitch(
                         checked = playbackManager.isFullPlayerVisualizerEnabled,
                         onCheckedChange = { toggleVisualizer(true) },
                         thumbContent = {
@@ -1035,7 +1036,7 @@ fun VisualizerSettingsBottomSheet(
             ListItem(
                 headlineContent = { Text(stringResource(R.string.visualizer_mini_player)) },
                 trailingContent = {
-                    Switch(
+                    BouncySwitch(
                         checked = playbackManager.isMiniPlayerVisualizerEnabled,
                         onCheckedChange = { toggleVisualizer(false) },
                         thumbContent = {
