@@ -1438,6 +1438,27 @@ fun MainScreen(
                                     result
                                 }
 
+                                val folderDirMap = remember(visibleFolders, rawAllSongs) {
+                                    visibleFolders.mapNotNull { folder ->
+                                        rawAllSongs.firstOrNull { it.folderName == folder }
+                                            ?.let { folder to it.path.substringBeforeLast("/") }
+                                    }.toMap()
+                                }
+
+                                val isFolderCategory = playbackManager.activeCategory == "FOLDERS"
+                                val playingFolderName = remember(playbackManager.activePlaylistId, visibleFolders) {
+                                    if (playbackManager.activeCategory == "FOLDERS" && playbackManager.activePlaylistId != null) {
+                                        visibleFolders.firstOrNull { it.hashCode().toLong() == playbackManager.activePlaylistId }
+                                    } else null
+                                }
+
+                                val ancestorNames = remember(playingFolderName, folderDirMap) {
+                                    val playingDir = playingFolderName?.let { folderDirMap[it] } ?: return@remember emptySet()
+                                    folderDirMap.filter { (name, dir) ->
+                                        name != playingFolderName && playingDir.startsWith(dir + "/")
+                                    }.keys
+                                }
+
                                 LazyColumn(
                                     modifier = Modifier.fillMaxSize(),
                                     contentPadding = PaddingValues(bottom = bottomPadding + 16.dp)
@@ -1446,6 +1467,8 @@ fun MainScreen(
                                         itemsIndexed(filteredHierarchy) { index, entry ->
                                             val songCount = visibleSongs.count { it.folderName == entry.name }
                                             val hasChildren = entry.name in parentFolders
+                                            val isPlaying = isFolderCategory && playbackManager.activePlaylistId == entry.name.hashCode().toLong()
+                                            val isAncestor = entry.name in ancestorNames
                                             ListItem(
                                                 headlineContent = { Text(entry.name, fontWeight = FontWeight.SemiBold) },
                                                 supportingContent = {
@@ -1458,35 +1481,56 @@ fun MainScreen(
                                                     }
                                                 },
                                                 leadingContent = {
-                                                    Surface(
-                                                        shape = CircleShape,
-                                                        color = if (entry.isVirtual) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.secondaryContainer,
-                                                        modifier = Modifier.size(56.dp)
-                                                    ) {
-                                                        Box(contentAlignment = Alignment.Center) {
-                                                            Icon(
-                                                                Icons.Default.Folder,
-                                                                contentDescription = null,
-                                                                tint = if (entry.isVirtual) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSecondaryContainer,
-                                                                modifier = Modifier.size(24.dp)
+                                                    Box(contentAlignment = Alignment.Center) {
+                                                        Surface(
+                                                            shape = CircleShape,
+                                                            color = if (entry.isVirtual) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.secondaryContainer,
+                                                            modifier = Modifier.size(56.dp)
+                                                        ) {
+                                                            Box(contentAlignment = Alignment.Center) {
+                                                                Icon(
+                                                                    Icons.Default.Folder,
+                                                                    contentDescription = null,
+                                                                    tint = if (entry.isVirtual) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSecondaryContainer,
+                                                                    modifier = Modifier.size(24.dp)
+                                                                )
+                                                            }
+                                                        }
+                                                        if (isPlaying) {
+                                                            Box(
+                                                                modifier = Modifier
+                                                                    .align(Alignment.BottomEnd)
+                                                                    .size(14.dp)
+                                                                    .background(MaterialTheme.colorScheme.primary, CircleShape)
+                                                                    .border(2.dp, MaterialTheme.colorScheme.surface, CircleShape)
                                                             )
                                                         }
                                                     }
                                                 },
                                                 trailingContent = {
-                                                    if (hasChildren) {
-                                                        IconButton(onClick = {
-                                                            expandedFolders = if (entry.name in expandedFolders) {
-                                                                expandedFolders - entry.name
-                                                            } else {
-                                                                expandedFolders + entry.name
-                                                            }
-                                                        }) {
-                                                            Icon(
-                                                                if (entry.name in expandedFolders) Icons.Default.ArrowDropDown else Icons.Default.ArrowRight,
-                                                                contentDescription = null,
-                                                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                                        if (isAncestor) {
+                                                            Box(
+                                                                modifier = Modifier
+                                                                    .size(8.dp)
+                                                                    .background(MaterialTheme.colorScheme.primary, CircleShape)
                                                             )
+                                                            Spacer(Modifier.width(4.dp))
+                                                        }
+                                                        if (hasChildren) {
+                                                            IconButton(onClick = {
+                                                                expandedFolders = if (entry.name in expandedFolders) {
+                                                                    expandedFolders - entry.name
+                                                                } else {
+                                                                    expandedFolders + entry.name
+                                                                }
+                                                            }) {
+                                                                Icon(
+                                                                    if (entry.name in expandedFolders) Icons.Default.ArrowDropDown else Icons.Default.ArrowRight,
+                                                                    contentDescription = null,
+                                                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                                                )
+                                                            }
                                                         }
                                                     }
                                                 },
@@ -1500,6 +1544,7 @@ fun MainScreen(
                                     } else {
                                         itemsIndexed(hierarchyEntries) { index, entry ->
                                             val songCount = visibleSongs.count { it.folderName == entry.name }
+                                            val isPlaying = isFolderCategory && playbackManager.activePlaylistId == entry.name.hashCode().toLong()
                                             ListItem(
                                                 headlineContent = { Text(entry.name, fontWeight = FontWeight.SemiBold) },
                                                 supportingContent = {
@@ -1510,9 +1555,20 @@ fun MainScreen(
                                                     }
                                                 },
                                                 leadingContent = {
-                                                    Surface(shape = CircleShape, color = MaterialTheme.colorScheme.secondaryContainer, modifier = Modifier.size(56.dp)) {
-                                                        Box(contentAlignment = Alignment.Center) {
-                                                            Icon(Icons.Default.Folder, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondaryContainer, modifier = Modifier.size(24.dp))
+                                                    Box(contentAlignment = Alignment.Center) {
+                                                        Surface(shape = CircleShape, color = MaterialTheme.colorScheme.secondaryContainer, modifier = Modifier.size(56.dp)) {
+                                                            Box(contentAlignment = Alignment.Center) {
+                                                                Icon(Icons.Default.Folder, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondaryContainer, modifier = Modifier.size(24.dp))
+                                                            }
+                                                        }
+                                                        if (isPlaying) {
+                                                            Box(
+                                                                modifier = Modifier
+                                                                    .align(Alignment.BottomEnd)
+                                                                    .size(14.dp)
+                                                                    .background(MaterialTheme.colorScheme.primary, CircleShape)
+                                                                    .border(2.dp, MaterialTheme.colorScheme.surface, CircleShape)
+                                                            )
                                                         }
                                                     }
                                                 },
