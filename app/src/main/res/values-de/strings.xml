@@ -319,4 +319,8 @@
     <string name="monero">Monero</string>
     <string name="monero_address">88s5Re4p6a3P9TtqaG1G2Yeq5Ppp1w1npXebyLjktuxYgurFAGn4GRbKuPKGbx1pD1bBwohtAriL7JqB12ECp4SnMN1T3q9</string>
     <string name="copied">In die Zwischenablage kopiert</string>
+    <string name="internal_storage">Interner Speicher</string>
+    <string name="sd_card">SD-Karte</string>
+    <string name="folder_browser_title">Ordnerbrowser</string>
+    <string name="no_songs_folder">Keine Songs in diesem Ordner gefunden</string>
 </resources>

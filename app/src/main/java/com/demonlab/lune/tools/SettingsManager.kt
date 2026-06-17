@@ -275,6 +275,10 @@ class SettingsManager(context: Context) {
         get() = prefs.getBoolean("show_all_folders_on_start", false)
         set(value) = prefs.edit().putBoolean("show_all_folders_on_start", value).apply()
 
+    var folderHierarchyMode: Boolean
+        get() = prefs.getBoolean("folder_hierarchy_mode", false)
+        set(value) = prefs.edit().putBoolean("folder_hierarchy_mode", value).apply()
+
     var useCustomColors: Boolean
         get() = prefs.getBoolean("use_custom_colors", false)
         set(value) = prefs.edit().putBoolean("use_custom_colors", value).apply()

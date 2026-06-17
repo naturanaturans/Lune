@@ -111,6 +111,7 @@ import androidx.compose.material.icons.automirrored.filled.VolumeDown
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.automirrored.filled.QueueMusic
 import androidx.compose.material.icons.automirrored.filled.PlaylistPlay
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.QueueMusic
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Repeat
@@ -579,9 +580,73 @@ fun MainScreen(
     var selectedAlbum by remember { mutableStateOf<Album?>(null) }
     var selectedFolderItem by remember { mutableStateOf<String?>(null) }
     var isAlbumView by remember { mutableStateOf(settingsManager.albumBrowseMode) }
+    var folderHierarchyMode by remember { mutableStateOf(settingsManager.folderHierarchyMode) }
 
     val visibleSongs = remember(rawAllSongs, hiddenFolders.value) {
         rawAllSongs.filter { !hiddenFolders.value.contains(it.folderName) }
+    }
+
+    data class FolderEntry(val name: String, val depth: Int, val isVirtual: Boolean)
+
+    val hierarchyEntries = remember(visibleFolders, rawAllSongs, folderHierarchyMode) {
+        if (!folderHierarchyMode) {
+            visibleFolders.sorted().map { FolderEntry(it, 0, false) }
+        } else {
+            val dirMap = visibleFolders.mapNotNull { folder ->
+                rawAllSongs.firstOrNull { it.folderName == folder }
+                    ?.let { folder to it.path.substringBeforeLast("/") }
+            }.toMap()
+
+            val songDirDepths = dirMap.values.map { it.count { c -> c == '/' } }
+            val minDepth = if (songDirDepths.isEmpty()) 0 else songDirDepths.min()
+
+            val virtualParents = mutableMapOf<String, String>()
+            for ((folder, dir) in dirMap) {
+                val depth = dir.count { c -> c == '/' }
+                val parentPath = dir.substringBeforeLast("/")
+                val parentName = parentPath.substringAfterLast("/")
+                if (parentName !in visibleFolders && depth > minDepth) {
+                    virtualParents[parentName] = parentPath
+                }
+            }
+
+            val allNames = dirMap.keys + virtualParents.keys
+
+            val childrenMap = mutableMapOf<String, MutableList<String>>()
+            val roots = mutableListOf<String>()
+
+            for ((folder, dir) in dirMap) {
+                val parentDir = dir.substringBeforeLast("/")
+                val parentName = parentDir.substringAfterLast("/")
+                if (parentName in allNames) {
+                    childrenMap.getOrPut(parentName) { mutableListOf() }.add(folder)
+                } else {
+                    roots.add(folder)
+                }
+            }
+
+            for ((parentName, parentPath) in virtualParents) {
+                val grandParentDir = parentPath.substringBeforeLast("/")
+                val grandParentName = grandParentDir.substringAfterLast("/")
+                if (grandParentName in allNames) {
+                    childrenMap.getOrPut(grandParentName) { mutableListOf() }.add(parentName)
+                } else {
+                    roots.add(parentName)
+                }
+            }
+
+            val entries = mutableListOf<FolderEntry>()
+            fun addEntry(name: String, depth: Int) {
+                val isVirtual = name !in visibleFolders
+                entries.add(FolderEntry(name, depth, isVirtual))
+                childrenMap[name]?.sorted()?.forEach { addEntry(it, depth + 1) }
+            }
+            roots.sorted().forEach { addEntry(it, 0) }
+            visibleFolders.filter { it !in dirMap }.sorted().forEach {
+                entries.add(FolderEntry(it, 0, false))
+            }
+            entries
+        }
     }
 
     val contextId = remember(selectedFolder) {
@@ -1309,47 +1374,153 @@ fun MainScreen(
                                                 )
                                             }
                                         }
-                                        Surface(
-                                            onClick = { onShowFolderSheetChange(true) },
-                                            shape = CircleShape,
-                                            color = MaterialTheme.colorScheme.secondaryContainer,
-                                            modifier = Modifier.size(36.dp)
-                                        ) {
-                                            Box(contentAlignment = Alignment.Center) {
-                                                Icon(
-                                                    Icons.Default.FilterList,
-                                                    contentDescription = null,
-                                                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                                                    modifier = Modifier.size(18.dp)
-                                                )
+                                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            Surface(
+                                                onClick = {
+                                                    folderHierarchyMode = !folderHierarchyMode
+                                                    settingsManager.folderHierarchyMode = folderHierarchyMode
+                                                },
+                                                shape = CircleShape,
+                                                color = if (folderHierarchyMode) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer,
+                                                modifier = Modifier.size(36.dp)
+                                            ) {
+                                                Box(contentAlignment = Alignment.Center) {
+                                                    Icon(
+                                                        if (folderHierarchyMode) Icons.AutoMirrored.Filled.List else Icons.Default.Folder,
+                                                        contentDescription = null,
+                                                        tint = if (folderHierarchyMode) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondaryContainer,
+                                                        modifier = Modifier.size(18.dp)
+                                                    )
+                                                }
+                                            }
+                                            Surface(
+                                                onClick = { onShowFolderSheetChange(true) },
+                                                shape = CircleShape,
+                                                color = MaterialTheme.colorScheme.secondaryContainer,
+                                                modifier = Modifier.size(36.dp)
+                                            ) {
+                                                Box(contentAlignment = Alignment.Center) {
+                                                    Icon(
+                                                        Icons.Default.FilterList,
+                                                        contentDescription = null,
+                                                        tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                        modifier = Modifier.size(18.dp)
+                                                    )
+                                                }
                                             }
                                         }
                                     }
                                 }
+                                val parentFolders = remember(hierarchyEntries) {
+                                    hierarchyEntries.filterIndexed { index, entry ->
+                                        index + 1 < hierarchyEntries.size && hierarchyEntries[index + 1].depth > entry.depth
+                                    }.map { it.name }.toSet()
+                                }
+
+                                var expandedFolders by remember { mutableStateOf<Set<String>>(emptySet()) }
+
+                                val filteredHierarchy = remember(hierarchyEntries, expandedFolders) {
+                                    val result = mutableListOf<FolderEntry>()
+                                    var i = 0
+                                    while (i < hierarchyEntries.size) {
+                                        val entry = hierarchyEntries[i]
+                                        result.add(entry)
+                                        val nextIdx = i + 1
+                                        if (nextIdx < hierarchyEntries.size && hierarchyEntries[nextIdx].depth > entry.depth) {
+                                            if (entry.name !in expandedFolders) {
+                                                while (i + 1 < hierarchyEntries.size && hierarchyEntries[i + 1].depth > entry.depth) {
+                                                    i++
+                                                }
+                                            }
+                                        }
+                                        i++
+                                    }
+                                    result
+                                }
+
                                 LazyColumn(
                                     modifier = Modifier.fillMaxSize(),
                                     contentPadding = PaddingValues(bottom = bottomPadding + 16.dp)
                                 ) {
-                                    itemsIndexed(visibleFolders) { index, folder ->
-                                        val songCount = visibleSongs.count { it.folderName == folder }
-                                        ListItem(
-                                            headlineContent = { Text(folder, fontWeight = FontWeight.SemiBold) },
-                                            supportingContent = {
-                                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                                    Icon(Icons.Default.MusicNote, null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                                                    Spacer(modifier = Modifier.width(4.dp))
-                                                    Text("$songCount", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                                }
-                                            },
-                                            leadingContent = {
-                                                Surface(shape = CircleShape, color = MaterialTheme.colorScheme.secondaryContainer, modifier = Modifier.size(56.dp)) {
-                                                    Box(contentAlignment = Alignment.Center) {
-                                                        Icon(Icons.Default.Folder, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondaryContainer, modifier = Modifier.size(24.dp))
+                                    if (folderHierarchyMode) {
+                                        itemsIndexed(filteredHierarchy) { index, entry ->
+                                            val songCount = visibleSongs.count { it.folderName == entry.name }
+                                            val hasChildren = entry.name in parentFolders
+                                            ListItem(
+                                                headlineContent = { Text(entry.name, fontWeight = FontWeight.SemiBold) },
+                                                supportingContent = {
+                                                    if (!entry.isVirtual) {
+                                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                                            Icon(Icons.Default.MusicNote, null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                                            Spacer(modifier = Modifier.width(4.dp))
+                                                            Text("$songCount", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                                        }
                                                     }
-                                                }
-                                            },
-                                            modifier = Modifier.clickable { selectedFolderItem = folder }
-                                        )
+                                                },
+                                                leadingContent = {
+                                                    Surface(
+                                                        shape = CircleShape,
+                                                        color = if (entry.isVirtual) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.secondaryContainer,
+                                                        modifier = Modifier.size(56.dp)
+                                                    ) {
+                                                        Box(contentAlignment = Alignment.Center) {
+                                                            Icon(
+                                                                Icons.Default.Folder,
+                                                                contentDescription = null,
+                                                                tint = if (entry.isVirtual) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSecondaryContainer,
+                                                                modifier = Modifier.size(24.dp)
+                                                            )
+                                                        }
+                                                    }
+                                                },
+                                                trailingContent = {
+                                                    if (hasChildren) {
+                                                        IconButton(onClick = {
+                                                            expandedFolders = if (entry.name in expandedFolders) {
+                                                                expandedFolders - entry.name
+                                                            } else {
+                                                                expandedFolders + entry.name
+                                                            }
+                                                        }) {
+                                                            Icon(
+                                                                if (entry.name in expandedFolders) Icons.Default.ArrowDropDown else Icons.Default.ArrowRight,
+                                                                contentDescription = null,
+                                                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                                            )
+                                                        }
+                                                    }
+                                                },
+                                                modifier = Modifier
+                                                    .padding(start = (entry.depth * 24).dp)
+                                                    .then(
+                                                        if (entry.isVirtual) Modifier else Modifier.clickable { selectedFolderItem = entry.name }
+                                                    )
+                                            )
+                                        }
+                                    } else {
+                                        itemsIndexed(hierarchyEntries) { index, entry ->
+                                            val songCount = visibleSongs.count { it.folderName == entry.name }
+                                            ListItem(
+                                                headlineContent = { Text(entry.name, fontWeight = FontWeight.SemiBold) },
+                                                supportingContent = {
+                                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                                        Icon(Icons.Default.MusicNote, null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                                        Spacer(modifier = Modifier.width(4.dp))
+                                                        Text("$songCount", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                                    }
+                                                },
+                                                leadingContent = {
+                                                    Surface(shape = CircleShape, color = MaterialTheme.colorScheme.secondaryContainer, modifier = Modifier.size(56.dp)) {
+                                                        Box(contentAlignment = Alignment.Center) {
+                                                            Icon(Icons.Default.Folder, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondaryContainer, modifier = Modifier.size(24.dp))
+                                                        }
+                                                    }
+                                                },
+                                                modifier = Modifier
+                                                    .padding(start = (entry.depth * 24).dp)
+                                                    .clickable { selectedFolderItem = entry.name }
+                                            )
+                                        }
                                     }
                                 }
                             }
