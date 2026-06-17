@@ -101,6 +101,14 @@ height="40">](https://f-droid.org/es/packages/com.demonlab.lune/)
   <img src="readme-res/15.png" width="140">
 </p>
 
+<p align="center">
+  <img src="readme-res/16.png" width="140">
+  <img src="readme-res/17.png" width="140">
+  <img src="readme-res/18.png" width="140">
+  <img src="readme-res/19.png" width="140">
+  <img src="readme-res/20.png" width="140">
+</p>
+
 ## 🛠 Build Requirements
 
 To build Lune from source, ensure your environment meets the following requirements:

@@ -401,7 +401,7 @@ fun PlaylistDetailView(
         }
 
         LaunchedEffect(scrollToCurrentTrigger.value) {
-            if (targetIndex != -1) {
+            if (targetIndex != -1 && scrollToCurrentTrigger.value > 0) {
                 listState.animateScrollToItem(targetIndex)
             }
         }
@@ -727,7 +727,7 @@ fun AlbumDetailView(
         }
 
         LaunchedEffect(scrollToCurrentTrigger.value) {
-            if (targetIndex != -1) {
+            if (targetIndex != -1 && scrollToCurrentTrigger.value > 0) {
                 listState.animateScrollToItem(targetIndex)
             }
         }
@@ -1109,7 +1109,7 @@ fun FolderDetailView(
         }
 
         LaunchedEffect(scrollToCurrentTrigger.value) {
-            if (targetIndex != -1) {
+            if (targetIndex != -1 && scrollToCurrentTrigger.value > 0) {
                 listState.animateScrollToItem(targetIndex)
             }
         }
