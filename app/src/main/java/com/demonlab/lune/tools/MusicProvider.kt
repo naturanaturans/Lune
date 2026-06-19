@@ -205,12 +205,16 @@ class MusicProvider(private val context: Context) {
 
                 val contentUri: Uri = ContentUris.withAppendedId(collection, id)
 
-                val albumArtUri = try {
-                    ContentUris.withAppendedId(
-                        "content://media/external/audio/albumart".toUri(),
-                        albumId
-                    )
-                } catch (_: Exception) { null }
+                val albumArtUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    contentUri
+                } else {
+                    try {
+                        ContentUris.withAppendedId(
+                            "content://media/external/audio/albumart".toUri(),
+                            albumId
+                        )
+                    } catch (_: Exception) { null }
+                }
 
                 songList.add(
                     Song(
