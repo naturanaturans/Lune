@@ -1705,6 +1705,7 @@ fun MainScreen(
                                 LaunchedEffect(scrollToCurrentTrigger.value) {
                                     if (targetIndex != -1 && scrollToCurrentTrigger.value > 0) {
                                         pageMainListState.animateScrollToItem(targetIndex)
+                                        scrollToCurrentTrigger.value = 0
                                     }
                                 }
 
