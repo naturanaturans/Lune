@@ -359,8 +359,10 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
         val context = getApplication<Application>()
         val settingsManager = SettingsManager.getInstance(context)
         viewModelScope.launch {
-            withContext(Dispatchers.IO) {
+            val deleted = withContext(Dispatchers.IO) {
                 try {
+                    var success = false
+
                     // 1. Try to delete via SAF if we have a folder URI
                     val folderUriString = settingsManager.musicFolderUri as String?
                     if (folderUriString != null) {
@@ -369,36 +371,38 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
                         if (tree != null && tree.canWrite()) {
                             val fileName = java.io.File(songData).name
                             val fileInSaf = tree.findFile(fileName)
-                            fileInSaf?.delete()
+                            if (fileInSaf?.delete() == true) success = true
                         }
                     }
 
                     // 2. Delete from MediaStore
-                    // On Android 11+, this might throw a RecoverableSecurityException if not owner
-                    context.contentResolver.delete(
-                        songUri,
-                        null,
-                        null
-                    )
+                    val rows = context.contentResolver.delete(songUri, null, null)
+                    if (rows > 0) success = true
                     
-                    // 3. Fallback: direct file delete (will only work if owner or on older APIs)
+                    // 3. Fallback: direct file delete
                     val file = java.io.File(songData)
-                    if (file.exists()) {
-                        file.delete()
+                    if (file.exists() && file.delete()) success = true
+                    
+                    // 4. Delete metadata overrides (only if deletion succeeded)
+                    if (success) {
+                        val db = com.demonlab.lune.data.MusicDatabase.getDatabase(context)
+                        val override = db.songOverrideDao().getOverrideForSong(songId)
+                        if (override != null) {
+                            db.songOverrideDao().deleteOverride(override)
+                        }
                     }
                     
-                    // 4. Delete metadata overrides
-                    val db = com.demonlab.lune.data.MusicDatabase.getDatabase(context)
-                    val override = db.songOverrideDao().getOverrideForSong(songId)
-                    if (override != null) {
-                        db.songOverrideDao().deleteOverride(override)
-                    }
+                    success
                 } catch (e: Exception) {
                     e.printStackTrace()
+                    false
                 }
             }
+            
+            if (deleted) {
+                loadSongs()
+            }
             visuallyDeletedIds.remove(songId)
-            loadSongs()
         }
     }
 
