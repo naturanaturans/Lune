@@ -1245,7 +1245,6 @@ fun MainScreen(
                                     onCurrentSongChange(song)
                                     playbackManager.play(song, listContext, -100L, category = "ALL", shuffleMode = playbackManager.isShuffle)
                                     onIsPlayingChange(true)
-                                    onIsPlayerExpandedChange(true)
                                 },
                                 onPlaylistClick = { playlist ->
                                     selectedPlaylist = playlist
@@ -1680,7 +1679,6 @@ fun MainScreen(
                                                     playbackManager.play(song, pageSortedSongs, pageContextId, category = folder, shuffleMode = isShuffleActive)
                                                     onIsPlayingChange(true)
                                                 }
-                                                onIsPlayerExpandedChange(true)
                                             },
                                             onOptionsClick = {
                                                 optionsSong = song
