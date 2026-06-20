@@ -416,7 +416,7 @@ fun FullPlayer(
         if (!isCinematic && hasBlurBackground) {
             val blurRequest = remember(song.id) {
                 ImageRequest.Builder(context)
-                    .data(song.coverUrl ?: song.albumArtUri)
+                            .data(song.coverUrl ?: song.uri)
                     .crossfade(true)
                     .fallback(R.drawable.ic_artwork_fallback)
                     .error(R.drawable.ic_artwork_fallback)
@@ -454,7 +454,7 @@ fun FullPlayer(
             Crossfade(targetState = song.id, animationSpec = tween(400)) { _ ->
                 val request = remember(song.id) {
                     ImageRequest.Builder(context)
-                        .data(song.coverUrl ?: song.albumArtUri)
+                        .data(song.coverUrl ?: song.uri)
                         .crossfade(true)
                         .fallback(R.drawable.ic_artwork_fallback)
                         .error(R.drawable.ic_artwork_fallback)
@@ -501,7 +501,7 @@ fun FullPlayer(
                     Crossfade(targetState = song.id, animationSpec = tween(400)) { _ ->
                         val request = remember(song.id) {
                             ImageRequest.Builder(context)
-                                .data(song.coverUrl ?: song.albumArtUri)
+                                .data(song.coverUrl ?: song.uri)
                                 .crossfade(true)
                                 .fallback(R.drawable.ic_artwork_fallback)
                                 .error(R.drawable.ic_artwork_fallback)
@@ -587,7 +587,7 @@ fun FullPlayer(
                 ) {
                     if (coverShape == 2 && coverVinylEffect) {
                         VinylRecordAsyncCover(
-                            model = song.coverUrl ?: song.albumArtUri,
+                            model = song.coverUrl ?: song.uri,
                             rotation = if (coverSpin && isPlaying) spinRotation else 0f,
                             modifier = Modifier.fillMaxSize()
                         )
@@ -606,7 +606,7 @@ fun FullPlayer(
                             tonalElevation = 8.dp
                         ) {
                             AsyncImage(
-                                model = song.coverUrl ?: song.albumArtUri,
+                                model = song.coverUrl ?: song.uri,
                                 contentDescription = null,
                                 modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Crop
@@ -1396,7 +1396,7 @@ fun MiniPlayer(
                         ) {
                             if (coverShape == 2 && coverVinylEffect) {
                                 VinylRecordAsyncCover(
-                                    model = song.coverUrl ?: song.albumArtUri ?: R.drawable.ic_launcher_foreground,
+                                    model = song.coverUrl ?: song.uri,
                                     rotation = if (coverSpin && isPlaying) spinRotation else 0f,
                                     modifier = Modifier.fillMaxSize()
                                 )
@@ -1414,7 +1414,7 @@ fun MiniPlayer(
                                     color = MaterialTheme.colorScheme.secondaryContainer
                                 ) {
                                     AsyncImage(
-                                        model = song.coverUrl ?: song.albumArtUri ?: R.drawable.ic_launcher_foreground,
+                                        model = song.coverUrl ?: song.uri,
                                         contentDescription = null,
                                         modifier = Modifier.fillMaxSize(),
                                         contentScale = ContentScale.Crop
@@ -1665,7 +1665,7 @@ fun MiniPlayerMinimized(
             }
             if (coverShape == 2 && coverVinylEffect) {
                 VinylRecordAsyncCover(
-                    model = song.coverUrl ?: song.albumArtUri ?: R.drawable.ic_launcher_foreground,
+                    model = song.coverUrl ?: song.uri,
                     rotation = if (coverSpin && isPlaying) spinRotation else 0f,
                     modifier = Modifier.fillMaxSize()
                 )
@@ -1683,7 +1683,7 @@ fun MiniPlayerMinimized(
                     color = MaterialTheme.colorScheme.secondaryContainer
                 ) {
                     AsyncImage(
-                        model = song.coverUrl ?: song.albumArtUri ?: R.drawable.ic_launcher_foreground,
+                        model = song.coverUrl ?: song.uri,
                         contentDescription = null,
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop

@@ -707,7 +707,7 @@ class MusicService : MediaBrowserServiceCompat() {
     private suspend fun fetchAlbumArt(song: Song): android.graphics.Bitmap? {
         val loader = this.imageLoader
         val request = ImageRequest.Builder(this)
-            .data(song.coverUrl ?: song.albumArtUri)
+            .data(song.coverUrl ?: song.uri)
             .allowHardware(false)
             .build()
 
