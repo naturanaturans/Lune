@@ -558,11 +558,13 @@ class PlaybackManager private constructor(private val context: Context) {
     }
 
 
-    fun playNextFromService(isNaturalEnd: Boolean = false) {
+    fun playNextFromService(isNaturalEnd: Boolean = false, startPlayback: Boolean = true) {
         if (activePlaylist.isEmpty()) return
         
         if (repeatMode == 1) { // Repeat One
-            currentSong?.let { play(it) }
+            if (startPlayback) {
+                currentSong?.let { play(it) }
+            }
             return
         }
 
@@ -608,7 +610,11 @@ class PlaybackManager private constructor(private val context: Context) {
             }
         }
 
-        play(nextSong)
+        if (startPlayback) {
+            play(nextSong)
+        } else {
+            currentSong = nextSong
+        }
     }
 
     fun playPreviousFromService() {

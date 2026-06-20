@@ -2181,9 +2181,9 @@ fun MainScreen(
                         val song = songToDelete!!
                         showDeleteDialog = false
                         
-                        // Fix: If current song is deleted, skip to next
+                        // Fix: If current song is deleted, skip to next (respect pause state)
                         if (currentSong?.id == song.id) {
-                            playbackManager.playNextFromService()
+                            playbackManager.playNextFromService(startPlayback = isPlaying)
                         }
                         
                         musicViewModel.prepareDeleteSong(song)
