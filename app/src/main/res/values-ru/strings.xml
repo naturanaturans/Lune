@@ -65,6 +65,8 @@
     <string name="option_lyrics">Текст песни</string>
     <string name="transition_mixing">Микширование</string>
     <string name="transition_crossfade">Кроссфейд</string>
+    <string name="crossfade_time">Время кроссфейда</string>
+    <string name="crossfade_time_desc">Установить длительность перехода кроссфейда</string>
     <string name="unknown_artist">Неизвестный исполнитель</string>
     <string name="unknown_song">Неизвестная песня</string>
     

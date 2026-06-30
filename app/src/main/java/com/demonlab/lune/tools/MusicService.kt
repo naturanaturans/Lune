@@ -537,8 +537,10 @@ class MusicService : MediaBrowserServiceCompat() {
     fun crossfadeToSong(song: Song) {
         if (!isCrossfading) {
             val mp = mediaPlayer
-            val remaining = if (mp != null) (mp.duration - mp.currentPosition).toLong() else 12000L
-            performCrossfade(song, if (remaining in 1..12000L) remaining else 12000L)
+            val fadeMs = if (settingsManager.isCrossfadeCustomDuration)
+                settingsManager.crossfadeDurationSeconds * 1000L else 12000L
+            val remaining = if (mp != null) (mp.duration - mp.currentPosition).toLong() else fadeMs
+            performCrossfade(song, if (remaining in 1..fadeMs) remaining else fadeMs)
         }
     }
 
@@ -552,7 +554,8 @@ class MusicService : MediaBrowserServiceCompat() {
                 if (mp != null && mp.isPlaying && (playbackManager.isCrossfade || playbackManager.isAutomix) && !isCrossfading) {
                     val remaining = mp.duration - mp.currentPosition
                     val duration = mp.duration
-                    val maxTriggerMs = 12000L // Standard transition duration: 12 seconds
+                    val maxTriggerMs = if (settingsManager.isCrossfadeCustomDuration)
+                        settingsManager.crossfadeDurationSeconds * 1000L else 12000L
 
                     // Only fire if we have enough time left and are nearing the end
                     if (duration > maxTriggerMs && remaining in 1..maxTriggerMs && mp.currentPosition > (duration / 2)) {

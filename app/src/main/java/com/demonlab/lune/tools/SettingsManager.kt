@@ -96,6 +96,14 @@ class SettingsManager(context: Context) {
         get() = prefs.getBoolean("is_crossfade", false)
         set(value) = prefs.edit().putBoolean("is_crossfade", value).apply()
 
+    var isCrossfadeCustomDuration: Boolean
+        get() = prefs.getBoolean("is_crossfade_custom_duration", false)
+        set(value) = prefs.edit().putBoolean("is_crossfade_custom_duration", value).apply()
+
+    var crossfadeDurationSeconds: Int
+        get() = prefs.getInt("crossfade_duration_seconds", 12)
+        set(value) = prefs.edit().putInt("crossfade_duration_seconds", value).apply()
+
     var isAutomix: Boolean
         get() = prefs.getBoolean("is_automix", false)
         set(value) = prefs.edit().putBoolean("is_automix", value).apply()

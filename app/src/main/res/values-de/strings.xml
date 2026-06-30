@@ -62,6 +62,8 @@
     <string name="option_lyrics">Liedtext</string>
     <string name="transition_mixing">Mischen</string>
     <string name="transition_crossfade">Crossfade</string>
+    <string name="crossfade_time">Crossfade-Dauer</string>
+    <string name="crossfade_time_desc">Übergangsdauer für Crossfade festlegen</string>
     <string name="unknown_artist">Unbekannter Künstler</string>
     <string name="unknown_song">Unbekannter Song</string>
 

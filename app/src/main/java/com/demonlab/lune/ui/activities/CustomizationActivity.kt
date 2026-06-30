@@ -34,6 +34,9 @@ import androidx.compose.material.icons.filled.AutoAwesome
 import com.demonlab.lune.tools.SettingsManager
 import com.demonlab.lune.ui.theme.LuneTheme
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.material.icons.filled.Gesture
 
 class CustomizationActivity : ComponentActivity() {
@@ -56,7 +59,6 @@ class CustomizationActivity : ComponentActivity() {
             var isHapticVibrationEnabled by remember { mutableStateOf(settingsManager.isHapticVibrationEnabled) }
             var isSongInfoEnabled by remember { mutableStateOf(settingsManager.isSongInfoEnabled) }
             var isCinematicEnabled by remember { mutableStateOf(settingsManager.isCinematicPlayerEnabled) }
-
             LuneTheme(
                 darkTheme = targetDarkTheme,
                 useCustomColors = useCustomColors,
@@ -125,6 +127,8 @@ fun CustomizationScreen(
     var showBitrateSheet by remember { mutableStateOf(false) }
     var isSectionCustomizationEnabled by remember { mutableStateOf(settingsManager.isSectionCustomizationEnabled) }
     var hiddenSectionTabs by remember { mutableStateOf(settingsManager.hiddenSectionTabs) }
+    var isCrossfadeCustomDuration by remember { mutableStateOf(settingsManager.isCrossfadeCustomDuration) }
+    var crossfadeDurationSeconds by remember { mutableStateOf(settingsManager.crossfadeDurationSeconds) }
 
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
@@ -532,12 +536,78 @@ fun CustomizationScreen(
                     headlineText = stringResource(R.string.blur),
                     supportingText = stringResource(R.string.blur_desc),
                     icon = Icons.Default.BlurOn,
-                    position = SectionPosition.LAST,
+                    position = SectionPosition.MIDDLE,
                     onClick = {
                         context.startActivity(Intent(context, BlurCustomizationActivity::class.java))
                     }
                 )
-
+                val crossfadeSwitchPosition = if (isCrossfadeCustomDuration) SectionPosition.MIDDLE else SectionPosition.LAST
+                SettingsPreferenceItem(
+                    headlineText = stringResource(R.string.crossfade_time),
+                    supportingText = stringResource(R.string.crossfade_time_desc),
+                    icon = Icons.Default.Tune,
+                    position = crossfadeSwitchPosition,
+                    trailingContent = {
+                        BouncySwitch(
+                            checked = isCrossfadeCustomDuration,
+                            onCheckedChange = {
+                                isCrossfadeCustomDuration = it
+                                settingsManager.isCrossfadeCustomDuration = it
+                            },
+                            thumbContent = {
+                                Icon(
+                                    imageVector = if (isCrossfadeCustomDuration) Icons.Default.Check else Icons.Default.Close,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(SwitchDefaults.IconSize)
+                                )
+                            }
+                        )
+                    }
+                )
+                AnimatedVisibility(
+                    visible = isCrossfadeCustomDuration,
+                    enter = expandVertically(),
+                    exit = shrinkVertically()
+                ) {
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 1.dp),
+                        shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp, bottomStart = 28.dp, bottomEnd = 28.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        tonalElevation = 1.dp
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp, vertical = 12.dp)
+                        ) {
+                            Text(
+                                text = "${crossfadeDurationSeconds}s",
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Slider(
+                                value = crossfadeDurationSeconds.toFloat(),
+                                onValueChange = {
+                                    crossfadeDurationSeconds = it.toInt()
+                                    settingsManager.crossfadeDurationSeconds = it.toInt()
+                                },
+                                valueRange = 1f..12f,
+                                steps = 10,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text("1s", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text("12s", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                    }
+                }
             }
         }
     }

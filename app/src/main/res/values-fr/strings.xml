@@ -62,6 +62,8 @@
     <string name="option_lyrics">Paroles</string>
     <string name="transition_mixing">Mixage</string>
     <string name="transition_crossfade">Fondu enchaîné</string>
+    <string name="crossfade_time">Durée du fondu</string>
+    <string name="crossfade_time_desc">Définir la durée de la transition</string>
     <string name="unknown_artist">Artiste inconnu</string>
     <string name="unknown_song">Chanson inconnue</string>
 

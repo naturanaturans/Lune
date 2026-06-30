@@ -62,6 +62,8 @@
     <string name="option_lyrics">歌词</string>
     <string name="transition_mixing">混音</string>
     <string name="transition_crossfade">交叉淡化</string>
+    <string name="crossfade_time">交叉淡化时长</string>
+    <string name="crossfade_time_desc">设置交叉淡化的过渡时长</string>
     <string name="unknown_artist">未知艺术家</string>
     <string name="unknown_song">未知歌曲</string>
     
