@@ -1,0 +1,3 @@
+- Add new option in customization settign for crossfade
+- Fix notification music
+- Minor Fixes
