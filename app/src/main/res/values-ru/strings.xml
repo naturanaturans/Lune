@@ -17,7 +17,7 @@
 
     <!-- UI/Player Strings -->
     <string name="eq_title">Эквалайзер</string>
-    <string name="eq_empty_hint">Возпроизведите песню, чтобы настроить эквалайзер</string>
+    <string name="eq_empty_hint">Воспроизведите песню, чтобы настроить эквалайзер</string>
     <string name="bass_label">EXTRA BASS</string>
     <string name="spatial_audio_label">Объёмный звук</string>
     <string name="loudness_label">Громкость</string>
@@ -32,11 +32,11 @@
     <string name="open_queue">Открыть очередь</string>
     
     <!-- EQ Bands -->
-    <string name="band_sub_bass">Sub Bass</string>
+    <string name="band_sub_bass">Саб-бас</string>
     <string name="band_bass">Бас</string>
     <string name="band_mid">Средние</string>
-    <string name="band_presence">Presence</string>
-    <string name="band_brilliance">Brilliance</string>
+    <string name="band_presence">Присутствие</string>
+    <string name="band_brilliance">Яркость</string>
 
     <!-- Metadata Editor -->
     <string name="edit_title">Название</string>
@@ -59,26 +59,26 @@
 
     <!-- Player Options -->
     <string name="option_shuffle">Перемешать</string>
-    <string name="option_crossfade">Crossfade</string>
-    <string name="option_automix">Automix</string>
+    <string name="option_crossfade">Кроссфейд</string>
+    <string name="option_automix">Автомикс</string>
     <string name="option_timer">Таймер</string>
     <string name="option_lyrics">Текст песни</string>
-    <string name="transition_mixing">Mixing</string>
-    <string name="transition_crossfade">Crossfade</string>
+    <string name="transition_mixing">Микширование</string>
+    <string name="transition_crossfade">Кроссфейд</string>
     <string name="unknown_artist">Неизвестный исполнитель</string>
     <string name="unknown_song">Неизвестная песня</string>
     
     <!-- Accessibility / Icons -->
     <string name="cd_back">Назад</string>
-    <string name="cd_restore">В</string>
+    <string name="cd_restore">Восстановить</string>
     
     <!-- Other UI -->
     <string name="filter_folders">Фильтр папок</string>
     <string name="option_favorite">В избранное</string>
 
     <string name="language">Язык</string>
-    <string name="select_language">Выбрать язые</string>
-    <string name="lang_system">С</string>
+    <string name="select_language">Выбрать язык</string>
+    <string name="lang_system">Система</string>
     <string name="lang_english">English</string>
     <string name="lang_spanish">Spanish</string>
     <string name="lang_portuguese">Portuguese</string>
@@ -103,7 +103,7 @@
     <string name="theme_auto">Авто (Система)</string>
     <string name="theme_light">Светлый режим</string>
     <string name="theme_dark">Тёмный режим</string>
-    <string name="add_songs">Добавить п</string>
+    <string name="add_songs">Добавить песни</string>
     <string name="search_songs">Найти песню…</string>
     <string name="save_selection">Сохранить</string>
     <string name="delete_song">Удалить с устройства</string>
@@ -114,7 +114,7 @@
     <string name="search">Поиск</string>
     <string name="search_filter">Фильтр результатов</string>
     <string name="search_filter_all">Все</string>
-    <string name="search_filter_playlist">Playlist</string>
+    <string name="search_filter_playlist">Плейлист</string>
     <string name="search_filter_album">Альбом</string>
     <string name="search_filter_artist">Исполнитель</string>
     <string name="search_filter_folder">Папка</string>
@@ -138,7 +138,7 @@
     <string name="haptic_vibration_desc">Лёгкая вибрация при использовании элементов управления плеера</string>
     <string name="song_info">Информация о песне</string>
     <string name="song_info_desc">Показывать формат и битрейт в плеере и списке песен</string>
-    <string name="show_in_song_list">Показывать в списке песег</string>
+    <string name="show_in_song_list">Показывать в списке песен</string>
     <string name="show_in_full_player">Показывать в полноэкранном плеере</string>
     <string name="show_options">Показать параметры</string>
     <string name="hide_options">Скрыть параметры</string>
@@ -150,7 +150,7 @@
     <string name="cover_size">Размер обложки</string>
     <string name="cover_spin">Вращать во время воспроизведения</string>
     <string name="cover_vinyl">Эффект виниловой пластинки</string>
-    <string name="cover_preview">Предосмотр плеера</string>
+    <string name="cover_preview">Просмотр плеера</string>
     <string name="cover_shape_title">Форма обложки</string>
     <string name="size_small">Маленькая (70%)</string>
     <string name="size_medium">Средняя (85%)</string>
@@ -160,7 +160,7 @@
     <string name="cover_vinyl_desc">Добавить текстуру виниловой пластинки</string>
     <string name="controls_player">Элементы управления плеером</string>
     <string name="controls_player_desc">Настройка кнопок "Предыдущая" и "Следующая"</string>
-    <string name="controls_preview">Предосмотр элементов управления</string>
+    <string name="controls_preview">Просмотр элементов управления</string>
     <string name="controls_style_title">Стиль кнопок</string>
     <string name="controls_filled">Залитые иконки</string>
     <string name="controls_filled_desc">Использовать залитые иконки</string>
@@ -168,7 +168,7 @@
     <string name="controls_custom_color_desc">Использовать динамический цвет Material You или пользовательскую палитру</string>
     <string name="color_palette">Цветовая палитра</string>
     <string name="restore_default_title">Восстановить по умолчанию</string>
-    <string name="categories">Категорит</string>
+    <string name="categories">Категории</string>
     <string name="edit_information">Редактировать информацию</string>
     <string name="info_updated">Информация обновлена</string>
     <string name="info_restored">Информация восстановлена</string>
@@ -215,14 +215,14 @@
     <string name="desukia">Desukia</string>
 
     <!-- Open Source Libraries -->
-    <string name="open_source_libraries">Open Source Libraries</string>
-    <string name="coil_desc">Image loading for Android backed by Kotlin Coroutines.\nLicense: Apache License 2.0</string>
+    <string name="open_source_libraries">Библиотеки с открытым исходным кодом</string>
+    <string name="coil_desc">Загрузка изображений для Android на базе Kotlin Coroutines.\nЛицензия: Apache License 2.0</string>
 
-    <string name="gson_desc">A Java serialization/deserialization library to convert Java Objects into JSON and back.\nLicense: Apache License 2.0</string>
-    <string name="room_desc">The Room persistence library provides an abstraction layer over SQLite.\nLicense: Apache License 2.0</string>
-    <string name="compose_desc">Android’s modern toolkit for building native UI.\nLicense: Apache License 2.0</string>
-    <string name="jaudiotagger_desc">Audio Tagging library for editing and reading tagging formats such as ID3, Vorbis, and FLAC.\nLicense: LGPL v2.1</string>
-    <string name="quicksand_desc">Quicksand is a sans-serif typeface designed by Andrew Paglinawan.\nLicense: SIL Open Font License, 1.1</string>
+    <string name="gson_desc">Библиотека Java для сериализации/десериализации объектов Java в JSON и обратно.\nЛицензия: Apache License 2.0</string>
+    <string name="room_desc">Библиотека персистентности Room предоставляет уровень абстракции над SQLite.\nЛицензия: Apache License 2.0</string>
+    <string name="compose_desc">Современный набор инструментов Android для создания нативного интерфейса.\nЛицензия: Apache License 2.0</string>
+    <string name="jaudiotagger_desc">Библиотека аудио-тегов для редактирования и чтения форматов ID3, Vorbis и FLAC.\nЛицензия: LGPL v2.1</string>
+    <string name="quicksand_desc">Quicksand — гротесковый шрифт, разработанный Эндрю Паглинаваном.\nЛицензия: SIL Open Font License, 1.1</string>
 
     <string name="permissions">Разрешения</string>
     <string name="permissions_desc">Информация об используемых разрешениях</string>
@@ -297,7 +297,7 @@
     <string name="onboarding_listen_style">Слушай со стилем</string>
     <string name="onboarding_feature_hifi">Поддержка HiFi-аудио</string>
 
-    <string name="onboarding_feature_title">настраиваемый заголовок</string>
+    <string name="onboarding_feature_title">Настраиваемый заголовок</string>
     <string name="onboarding_feature_lyrics">Динамические тексты песен</string>
     <string name="onboarding_feature_mix">Crossfade &amp; Automix</string>
     <string name="onboarding_feature_more">И многое другое…</string>

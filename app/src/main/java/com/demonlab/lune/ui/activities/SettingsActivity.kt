@@ -292,6 +292,7 @@ fun SettingsScreen(
                         "fr" -> stringResource(R.string.lang_french)
                         "zh" -> stringResource(R.string.lang_chinese)
                         "de" -> stringResource(R.string.lang_german)
+                        "ru" -> stringResource(R.string.lang_russian)
                         else -> stringResource(R.string.lang_system)
                     },
                     icon = Icons.Default.Language,
