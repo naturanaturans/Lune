@@ -348,7 +348,19 @@ class MusicService : MediaBrowserServiceCompat() {
                 })
             }
         }
-        return START_NOT_STICKY
+        return START_STICKY
+    }
+
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        val notification = NotificationCompat.Builder(this, "music_playback_channel")
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setOngoing(true)
+            .setContentTitle(getString(R.string.app_name))
+            .setContentText(getString(R.string.no_song_playing))
+            .setSilent(true)
+            .build()
+        startForeground(1, notification)
+        super.onTaskRemoved(rootIntent)
     }
 
 
