@@ -28,7 +28,7 @@ data class SongMetadata(
     val dateAdded: Long = 0,
 )
 
-private val gson: Gson = GsonBuilder().setPrettyPrinting().create()
+private val gson: Gson = GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create()
 
 class PlaylistBackupManager(context: Context) {
 

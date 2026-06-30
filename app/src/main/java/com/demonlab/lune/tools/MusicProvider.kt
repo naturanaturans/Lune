@@ -50,6 +50,7 @@ class MusicProvider(private val context: Context) {
     private val cacheFile = File(context.filesDir, "songs_cache.json")
     private val gson: Gson = GsonBuilder()
         .registerTypeAdapter(Uri::class.java, UriTypeAdapter())
+        .disableHtmlEscaping()
         .create()
 
     fun getCachedSongs(): List<Song> {
