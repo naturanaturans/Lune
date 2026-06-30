@@ -201,7 +201,7 @@ fun SongItem(
                         color = MaterialTheme.colorScheme.secondaryContainer,
                         modifier = Modifier.size(48.dp)
                     ) {
-                        val model = song.coverUrl ?: song.albumArtUri
+                        val model = song.coverUrl ?: song.uri
                         AsyncImage(
                             model = model,
                             contentDescription = null,

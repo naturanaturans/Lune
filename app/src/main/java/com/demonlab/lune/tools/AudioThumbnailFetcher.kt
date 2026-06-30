@@ -25,7 +25,22 @@ class AudioThumbnailFetcher(
 
     @RequiresApi(Build.VERSION_CODES.Q)
     override suspend fun fetch(): FetchResult? {
-        // 1. Try embedded picture via MediaMetadataRetriever
+        // 1. Try modern ContentResolver.loadThumbnail (fast, system-cached, per-song correct)
+        val thumbnail = runCatching {
+            val width = options.size.width.pxOrElse { 512 }
+            val height = options.size.height.pxOrElse { 512 }
+            context.contentResolver.loadThumbnail(uri, android.util.Size(width, height), null)
+        }.getOrNull()
+
+        if (thumbnail != null) {
+            return DrawableResult(
+                drawable = thumbnail.toDrawable(context.resources),
+                isSampled = true,
+                dataSource = DataSource.DISK
+            )
+        }
+
+        // 2. Fallback to embedded picture via MediaMetadataRetriever (slower, higher quality)
         val retriever = MediaMetadataRetriever()
         try {
             retriever.setDataSource(context, uri)
@@ -45,22 +60,7 @@ class AudioThumbnailFetcher(
             retriever.release()
         }
 
-        // 2. Try modern ContentResolver.loadThumbnail
-        val thumbnail = runCatching {
-            val width = options.size.width.pxOrElse { 512 }
-            val height = options.size.height.pxOrElse { 512 }
-            context.contentResolver.loadThumbnail(uri, android.util.Size(width, height), null)
-        }.getOrNull()
-
-        if (thumbnail != null) {
-            return DrawableResult(
-                drawable = thumbnail.toDrawable(context.resources),
-                isSampled = true,
-                dataSource = DataSource.DISK
-            )
-        }
-
-        // 3. Fallback to MediaStore album art
+        // 3. Final fallback to MediaStore album art
         val mediaId = try {
             ContentUris.parseId(uri)
         } catch (_: Exception) { null } ?: return null

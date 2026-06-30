@@ -111,7 +111,7 @@ fun AddSongsToPlaylistDialog(
                                 modifier = Modifier.size(40.dp)
                             ) {
                                 AsyncImage(
-                                    model = song.coverUrl ?: song.albumArtUri,
+                                    model = song.coverUrl ?: song.uri,
                                     contentDescription = null,
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier.fillMaxSize()

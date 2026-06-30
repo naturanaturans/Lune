@@ -92,7 +92,7 @@ fun PlaylistDetailView(
     }
 
     val backgroundCover = remember(songs) {
-        songs.firstOrNull()?.let { it.coverUrl ?: it.albumArtUri }
+        songs.firstOrNull()?.let { it.coverUrl ?: it.uri }
     }
 
     Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
@@ -466,7 +466,7 @@ fun AlbumDetailView(
     BackHandler(onBack = onBack)
 
     val backgroundCover = remember(album) {
-        album.songs.firstOrNull()?.let { it.coverUrl ?: it.albumArtUri }
+        album.songs.firstOrNull()?.let { it.coverUrl ?: it.uri }
     }
 
     Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
@@ -528,7 +528,7 @@ fun AlbumDetailView(
                         
                         val albumCoverBytes = remember(album) {
                             album.songs.firstOrNull()?.let { 
-                                it.coverUrl ?: it.albumArtUri 
+                                it.coverUrl ?: it.uri 
                             }
                         }
                         
@@ -790,11 +790,11 @@ fun FolderDetailView(
     }
 
     val backgroundCover = remember(songs) {
-        songs.firstOrNull()?.let { it.coverUrl ?: it.albumArtUri }
+        songs.firstOrNull()?.let { it.coverUrl ?: it.uri }
     }
 
     val covers = remember(songs) {
-        songs.map { it.coverUrl ?: it.albumArtUri }.distinct().take(4)
+        songs.map { it.coverUrl ?: it.uri }.distinct().take(4)
     }
 
     val folderId = folderName.hashCode().toLong()

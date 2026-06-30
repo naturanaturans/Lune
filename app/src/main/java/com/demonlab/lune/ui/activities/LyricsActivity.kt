@@ -140,7 +140,7 @@ fun LyricsScreen(onBack: () -> Unit) {
         // Blurred Background
         Box(modifier = Modifier.fillMaxSize()) {
             AsyncImage(
-                model = song.coverUrl ?: song.albumArtUri,
+                model = song.coverUrl ?: song.uri,
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxSize()

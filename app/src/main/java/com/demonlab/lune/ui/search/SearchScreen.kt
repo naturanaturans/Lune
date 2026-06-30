@@ -512,7 +512,7 @@ fun SearchScreen(
                                 supportingContent = { Text(album.artist, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                                 leadingContent = {
                                     AsyncImage(
-                                        model = album.songs.firstOrNull()?.let { it.coverUrl ?: it.albumArtUri } ?: R.drawable.ic_launcher_foreground,
+                                        model = album.songs.firstOrNull()?.let { it.coverUrl ?: it.uri } ?: R.drawable.ic_launcher_foreground,
                                         contentDescription = null,
                                         modifier = Modifier
                                             .size(50.dp)
@@ -566,7 +566,7 @@ fun SearchScreen(
                                 supportingContent = { Text("${album.songs.size} canciones") },
                                 leadingContent = {
                                     AsyncImage(
-                                        model = album.songs.firstOrNull()?.albumArtUri ?: R.drawable.ic_launcher_foreground,
+                                        model = album.songs.firstOrNull()?.let { it.coverUrl ?: it.uri } ?: R.drawable.ic_launcher_foreground,
                                         contentDescription = null,
                                         modifier = Modifier
                                             .size(50.dp)
