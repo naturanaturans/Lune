@@ -1,7 +1,10 @@
 package com.demonlab.lune.tools
 
 import android.app.*
+import android.content.Context
 import android.content.Intent
+import android.content.BroadcastReceiver
+import android.content.IntentFilter
 import android.media.MediaPlayer
 import android.os.Binder
 import android.os.Build
@@ -74,6 +77,7 @@ class MusicService : MediaBrowserServiceCompat() {
     private var lastBlurredBitmap: Bitmap? = null
     private var lastSongForRounded: Song? = null
     private var cachedRoundedArt: Bitmap? = null
+    private var becomingNoisyReceiver: BroadcastReceiver? = null
 
     private val audioFocusListener = AudioManager.OnAudioFocusChangeListener { focusChange ->
         when (focusChange) {
@@ -123,6 +127,15 @@ class MusicService : MediaBrowserServiceCompat() {
     override fun onCreate() {
         super.onCreate()
         audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
+
+        becomingNoisyReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                if (intent?.action == AudioManager.ACTION_AUDIO_BECOMING_NOISY && isPlaying()) {
+                    pause()
+                }
+            }
+        }
+        registerReceiver(becomingNoisyReceiver, IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY))
 
         mediaSession = MediaSessionCompat(this, "MusicService").apply {
             setCallback(object : MediaSessionCompat.Callback() {
@@ -1151,6 +1164,7 @@ class MusicService : MediaBrowserServiceCompat() {
     }
 
     override fun onDestroy() {
+        becomingNoisyReceiver?.let { unregisterReceiver(it) }
         equalizer?.release()
         bassBoost?.release()
         virtualizer?.release()
