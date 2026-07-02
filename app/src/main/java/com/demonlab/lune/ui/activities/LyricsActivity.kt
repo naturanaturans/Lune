@@ -74,14 +74,14 @@ class LyricsActivity : ComponentActivity() {
                 useCustomColors = useCustomColors,
                 customColorPalette = customColorPalette
             ) {
-                LyricsScreen(onBack = { finish() })
+                LyricsScreen(onBack = { finish() }, isDarkTheme = targetDarkTheme)
             }
         }
     }
 }
 
 @Composable
-fun LyricsScreen(onBack: () -> Unit) {
+fun LyricsScreen(onBack: () -> Unit, isDarkTheme: Boolean = false) {
     val context = LocalContext.current
     val playbackManager = remember { PlaybackManager.getInstance(context) }
     val song = playbackManager.currentSong ?: return
@@ -136,29 +136,43 @@ fun LyricsScreen(onBack: () -> Unit) {
         }
     }
 
+    val isBlurActive = lyricsSettings.isBlurEnabled && if (isDarkTheme) lyricsSettings.isBlurDarkMode else lyricsSettings.isBlurLightMode
+    val lyricsTextColor = if (isBlurActive) Color.White else MaterialTheme.colorScheme.onSurface
+    val lyricsMutedColor = if (isBlurActive) Color.White.copy(alpha = 0.3f) else MaterialTheme.colorScheme.onSurfaceVariant
+    val lyricsMuted2Color = if (isBlurActive) Color.White.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurfaceVariant
+    val lyricsMuted08Color = if (isBlurActive) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurface
+
     Box(modifier = Modifier.fillMaxSize()) {
-        // Blurred Background
-        Box(modifier = Modifier.fillMaxSize()) {
-            AsyncImage(
-                model = song.coverUrl ?: song.uri,
-                contentDescription = null,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .blur(50.dp)
-                    .alpha(0.5f),
-                contentScale = ContentScale.Crop
-            )
+        if (isBlurActive) {
+            // Blurred Background
+            Box(modifier = Modifier.fillMaxSize()) {
+                AsyncImage(
+                    model = song.coverUrl ?: song.uri,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .blur(50.dp)
+                        .alpha(0.5f),
+                    contentScale = ContentScale.Crop
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    Color.Black.copy(alpha = 0.6f),
+                                    Color.Black.copy(alpha = 0.8f)
+                                )
+                            )
+                        )
+                )
+            }
+        } else {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(
-                                Color.Black.copy(alpha = 0.6f),
-                                Color.Black.copy(alpha = 0.8f)
-                            )
-                        )
-                    )
+                    .background(MaterialTheme.colorScheme.surface)
             )
         }
 
@@ -171,20 +185,20 @@ fun LyricsScreen(onBack: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = onBack) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = lyricsTextColor)
                 }
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
                     Text(
                         song.title,
                         style = MaterialTheme.typography.titleMedium,
-                        color = Color.White,
+                        color = lyricsTextColor,
                         maxLines = 1
                     )
                     Text(
                         song.artist,
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color.White.copy(alpha = 0.7f),
+                        color = lyricsMuted2Color,
                         maxLines = 1
                     )
                 }
@@ -286,7 +300,7 @@ fun LyricsScreen(onBack: () -> Unit) {
                                     lineHeight = 28.sp,
                                     textAlign = alignments[textAlignIndex]
                                 ),
-                                color = Color.White.copy(alpha = 0.8f),
+                                color = lyricsMuted08Color,
                                 modifier = Modifier.padding(vertical = 4.dp)
                             )
                         }
@@ -300,7 +314,7 @@ fun LyricsScreen(onBack: () -> Unit) {
                     Text(
                         "No lyrics found",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = Color.White.copy(alpha = 0.7f)
+                        color = lyricsMuted2Color
                     )
                 }
             } else {
@@ -313,7 +327,7 @@ fun LyricsScreen(onBack: () -> Unit) {
                     itemsIndexed(lyricsLines) { index, line ->
                         val isActive = index == activeIndex
                         val color by animateColorAsState(
-                            targetValue = if (isActive) Color.White else Color.White.copy(alpha = 0.3f),
+                            targetValue = if (isActive) lyricsTextColor else lyricsMutedColor,
                             animationSpec = tween(300),
                             label = "LyricColor"
                         )
@@ -390,7 +404,7 @@ fun LyricsScreen(onBack: () -> Unit) {
                                 Icon(
                                     imageVector = if (alignments[textAlignIndex] == TextAlign.Start) Icons.AutoMirrored.Filled.FormatAlignLeft else Icons.Default.FormatAlignCenter,
                                     contentDescription = null,
-                                    tint = Color.White,
+                                    tint = lyricsTextColor,
                                     modifier = Modifier.size(24.dp)
                                 )
                             }
@@ -401,7 +415,7 @@ fun LyricsScreen(onBack: () -> Unit) {
                             }) {
                                 Text(
                                     text = "${speedOptions[speedIndex]}x",
-                                    color = Color.White,
+                                    color = lyricsTextColor,
                                     style = MaterialTheme.typography.titleMedium
                                 )
                             }
@@ -420,7 +434,7 @@ fun LyricsScreen(onBack: () -> Unit) {
                     Icon(
                         imageVector = if (isOptionsExpanded) Icons.Default.Close else Icons.Default.Add,
                         contentDescription = null,
-                        tint = Color.White,
+                        tint = lyricsTextColor,
                         modifier = Modifier.size(28.dp)
                     )
                 }
