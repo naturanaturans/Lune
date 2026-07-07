@@ -746,6 +746,7 @@ private fun parseLyrics(raw: String?): List<LyricsLine> {
     
     val lines = mutableListOf<LyricsLine>()
     val pattern = Pattern.compile("\\[(\\d{2}):(\\d{2})[.:](\\d{2,3})?\\](.*)")
+    var lastTimeMs = 0L
     
     normalizedLines.lines().forEach { line ->
         val matcher = pattern.matcher(line)
@@ -761,9 +762,15 @@ private fun parseLyrics(raw: String?): List<LyricsLine> {
                 else -> msPart.toLong()
             }
             val totalMs = (min * 60 * 1000) + (sec * 1000) + ms
+            lastTimeMs = totalMs
             
             if (!text.startsWith("[ti:") && !text.startsWith("[ar:") && !text.startsWith("[al:") && !text.startsWith("[by:")) {
                 lines.add(LyricsLine(totalMs, text))
+            }
+        } else {
+            val trimmed = line.trim()
+            if (trimmed.isNotEmpty() && !trimmed.startsWith("[")) {
+                lines.add(LyricsLine(lastTimeMs, trimmed))
             }
         }
     }
