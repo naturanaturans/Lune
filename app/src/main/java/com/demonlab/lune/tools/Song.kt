@@ -20,5 +20,6 @@ data class Song(
     val isFavorite: Boolean = false,
     val lyrics: String? = null,
     val format: String = "",
-    val bitrate: Int? = null
+    val bitrate: Int? = null,
+    val trackNumber: Int = 0
 )

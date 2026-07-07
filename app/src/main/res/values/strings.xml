@@ -244,6 +244,7 @@
     <string name="sort_options_title">Sort Songs</string>
     <string name="sort_ascending">Ascending</string>
     <string name="sort_descending">Descending</string>
+    <string name="sort_track_number">Track Number</string>
     <string name="sort_alphabetical">Alphabetical</string>
     <string name="sort_artist">Artist</string>
     <string name="sort_duration">Duration</string>

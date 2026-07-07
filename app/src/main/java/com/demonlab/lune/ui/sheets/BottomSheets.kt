@@ -332,6 +332,7 @@ fun SortBottomSheet(
 
             // Options cards
             val options = listOf(
+                "TRACK_NUMBER" to R.string.sort_track_number,
                 "ALPHABETICAL" to R.string.sort_alphabetical,
                 "ARTIST" to R.string.sort_artist,
                 "DURATION" to R.string.sort_duration,

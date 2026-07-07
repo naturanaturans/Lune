@@ -235,6 +235,7 @@
     <string name="sort_options_title">Organizar canciones</string>
     <string name="sort_ascending">Ascendente</string>
     <string name="sort_descending">Descendente</string>
+    <string name="sort_track_number">N.º de pista</string>
     <string name="sort_alphabetical">Alfabético</string>
     <string name="sort_artist">Artista</string>
     <string name="sort_duration">Duración</string>

@@ -240,6 +240,7 @@
     <string name="sort_options_title">Songs sortieren</string>
     <string name="sort_ascending">Aufsteigend</string>
     <string name="sort_descending">Absteigend</string>
+    <string name="sort_track_number">Titelnummer</string>
     <string name="sort_alphabetical">Alphabetisch</string>
     <string name="sort_artist">Künstler</string>
     <string name="sort_duration">Dauer</string>

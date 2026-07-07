@@ -245,6 +245,7 @@
     <string name="sort_options_title">Сортировка песен</string>
     <string name="sort_ascending">По возрастанию</string>
     <string name="sort_descending">По убыванию</string>
+    <string name="sort_track_number">По номеру трека</string>
     <string name="sort_alphabetical">По алфавиту</string>
     <string name="sort_artist">По исполнителю</string>
     <string name="sort_duration">По продолжительности</string>

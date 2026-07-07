@@ -853,6 +853,7 @@ class PlaybackManager private constructor(private val context: Context) {
             "ARTIST" -> if (caseSensitive) compareBy<Song> { it.artist } else compareBy<Song> { it.artist.lowercase(java.util.Locale.getDefault()) }
             "DURATION" -> compareBy<Song> { it.duration }
             "DATE_ADDED" -> compareBy<Song> { it.dateAdded }
+            "TRACK_NUMBER" -> compareBy<Song> { it.trackNumber }
             else -> if (caseSensitive) compareBy<Song> { it.title } else compareBy<Song> { it.title.lowercase(java.util.Locale.getDefault()) }
         }
         

@@ -114,6 +114,7 @@ class MusicProvider(private val context: Context) {
             MediaStore.Audio.Media.ALBUM_ID,
             MediaStore.Audio.Media.DATA,
             MediaStore.Audio.Media.DATE_ADDED,
+            MediaStore.Audio.Media.TRACK,
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 MediaStore.Audio.Media.GENRE
             } else {
@@ -145,6 +146,7 @@ class MusicProvider(private val context: Context) {
             val albumIdColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID)
             val dataColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
             val dateAddedColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED)
+            val trackColumn = cursor.getColumnIndex(MediaStore.Audio.Media.TRACK)
             val genreColumn = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 cursor.getColumnIndex(MediaStore.Audio.Media.GENRE)
             } else -1
@@ -161,6 +163,7 @@ class MusicProvider(private val context: Context) {
                 val albumId = cursor.getLong(albumIdColumn)
                 val data = cursor.getString(dataColumn)
                 val dateAdded = cursor.getLong(dateAddedColumn)
+                val trackNumber = if (trackColumn != -1) cursor.getInt(trackColumn) else 0
                 var genre = if (genreColumn != -1) cursor.getString(genreColumn) else null
 
                 val override = overrides[id]
@@ -217,7 +220,7 @@ class MusicProvider(private val context: Context) {
                     Song(
                         id, albumId, title, artist, album, duration, contentUri, data,
                         dateAdded, albumArtUri, genre, folderName, isHiFi, coverUrl, isFavorite, null,
-                        format, bitrate
+                        format, bitrate, trackNumber
                     )
                 )
             }

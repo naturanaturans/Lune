@@ -241,6 +241,7 @@
     <string name="sort_options_title">Organizar músicas</string>
     <string name="sort_ascending">Crescente</string>
     <string name="sort_descending">Decrescente</string>
+    <string name="sort_track_number">N.º da faixa</string>
     <string name="sort_alphabetical">Alfabético</string>
     <string name="sort_artist">Artista</string>
     <string name="sort_duration">Duração</string>

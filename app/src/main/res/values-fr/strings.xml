@@ -242,6 +242,7 @@
     <string name="sort_options_title">Trier les chansons</string>
     <string name="sort_ascending">Ascendant</string>
     <string name="sort_descending">Descendant</string>
+    <string name="sort_track_number">N° de piste</string>
     <string name="sort_alphabetical">Alphabétique</string>
     <string name="sort_artist">Artiste</string>
     <string name="sort_duration">Durée</string>

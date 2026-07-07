@@ -240,6 +240,7 @@
     <string name="sort_options_title">排序歌曲</string>
     <string name="sort_ascending">升序</string>
     <string name="sort_descending">降序</string>
+    <string name="sort_track_number">音轨编号</string>
     <string name="sort_alphabetical">按字母顺序</string>
     <string name="sort_artist">艺术家</string>
     <string name="sort_duration">时长</string>
