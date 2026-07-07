@@ -744,6 +744,8 @@ private fun parseLyrics(raw: String?): List<LyricsLine> {
         )
     }.joinToString("\n")
     
+    if (!raw.contains("[") && !raw.contains("<")) return emptyList()
+    
     val lines = mutableListOf<LyricsLine>()
     val pattern = Pattern.compile("\\[(\\d{2}):(\\d{2})[.:](\\d{2,3})?\\](.*)")
     var lastTimeMs = 0L
