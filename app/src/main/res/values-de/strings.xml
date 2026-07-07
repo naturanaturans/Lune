@@ -8,6 +8,9 @@
     <string name="hifi_audio">Hi-Fi Audio</string>
     <string name="hifi_desc">Hi-Fi Erkennung und Abzeichen aktivieren</string>
 
+    <string name="keep_screen_on">Bildschirm an lassen</string>
+    <string name="keep_screen_on_desc">Verhindert das Ausschalten des Bildschirms während der Nutzung der App</string>
+
     <string name="general">Allgemein</string>
     <string name="cinematic_player">Kinomodus</string>
     <string name="cinematic_player_desc">Aktiviert eine immersive Oberfläche mit beweglichem Cover und sanften Verläufen.</string>

@@ -8,6 +8,9 @@
     <string name="hifi_audio">Áudio Hi-Fi</string>
     <string name="hifi_desc">Ativar detecção e selos Hi-Fi</string>
 
+    <string name="keep_screen_on">Manter Tela Ligada</string>
+    <string name="keep_screen_on_desc">Impede que a tela desligue enquanto estiver no aplicativo</string>
+
     <string name="general">Geral</string>
     <string name="cinematic_player">Player Cinemático</string>
     <string name="cinematic_player_desc">Habilita uma interface imersiva com arte de capa em movimento e gradientes suaves.</string>

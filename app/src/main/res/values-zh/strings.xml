@@ -8,6 +8,9 @@
     <string name="hifi_audio">Hi-Fi 音频</string>
     <string name="hifi_desc">启用 Hi-Fi 检测和标签</string>
 
+    <string name="keep_screen_on">保持屏幕常亮</string>
+    <string name="keep_screen_on_desc">防止在使用应用时屏幕关闭</string>
+
     <string name="general">通用</string>
     <string name="cinematic_player">影院模式</string>
     <string name="cinematic_player_desc">启用沉浸式界面，包含动态封面和流畅渐变。</string>

@@ -8,6 +8,9 @@
     <string name="hifi_audio">Audio Hi-Fi</string>
     <string name="hifi_desc">Activer la détection et les badges Hi-Fi</string>
 
+    <string name="keep_screen_on">Garder l\'écran allumé</string>
+    <string name="keep_screen_on_desc">Empêche l\'écran de s\'éteindre pendant l\'utilisation de l\'application</string>
+
     <string name="general">Général</string>
     <string name="cinematic_player">Lecteur Cinématique</string>
     <string name="cinematic_player_desc">Active une interface immersive avec pochette animée et dégradé fluide.</string>

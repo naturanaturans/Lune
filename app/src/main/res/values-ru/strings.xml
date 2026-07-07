@@ -8,6 +8,9 @@
     <string name="hifi_audio">Hi-Fi Аудио</string>
     <string name="hifi_desc">Включает обнаружение Hi-Fi и значков</string>
 
+    <string name="keep_screen_on">Не выключать экран</string>
+    <string name="keep_screen_on_desc">Предотвращает выключение экрана при использовании приложения</string>
+
     <string name="general">Основное</string>
     <string name="cinematic_player">Кинематографический плеер</string>
     <string name="cinematic_player_desc">Включает иммерсивный интерфейс с движущейся обложкой и плавными градиентами.</string>

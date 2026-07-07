@@ -117,7 +117,6 @@ fun LyricsScreen(onBack: () -> Unit, isDarkTheme: Boolean = false) {
     }
     val lyricsSettings = remember { SettingsManager.getInstance(context) }
     val listState = rememberLazyListState()
-    var isOptionsExpanded by remember { mutableStateOf(false) }
     var textAlignIndex by remember { mutableIntStateOf(lyricsSettings.lyricsTextAlignment) }
     var speedIndex by remember { mutableIntStateOf(lyricsSettings.lyricsSpeedIndex) }
     val alignments = listOf(TextAlign.Start, TextAlign.Center)
@@ -125,6 +124,16 @@ fun LyricsScreen(onBack: () -> Unit, isDarkTheme: Boolean = false) {
     var isLyricsMiniPlayerMinimized by remember { mutableStateOf(false) }
     val playNext: () -> Unit = { playbackManager.playNextFromService() }
     val playPrevious: () -> Unit = { playbackManager.playPreviousFromService() }
+    var keepScreenOn by remember { mutableStateOf(lyricsSettings.keepScreenOn) }
+
+    LaunchedEffect(keepScreenOn) {
+        val window = (context as? androidx.activity.ComponentActivity)?.window
+        if (keepScreenOn) {
+            window?.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        } else {
+            window?.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+    }
     
     // Sync progress periodically. This runs constantly to keep the playback position updated.
     LaunchedEffect(Unit) {

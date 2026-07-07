@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.LightMode
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import androidx.compose.material3.*
@@ -109,6 +110,7 @@ fun SettingsScreen(
     val settingsManager = remember { SettingsManager.getInstance(context) }
     var showWhatsapp by remember { mutableStateOf(settingsManager.showWhatsappAudio) }
     var showHiFi by remember { mutableStateOf(settingsManager.enableHiFi) }
+    var keepScreenOn by remember { mutableStateOf(settingsManager.keepScreenOn) }
 
     var isCinematicEnabled by remember { mutableStateOf(settingsManager.isCinematicPlayerEnabled) }
     var showLanguageDialog by remember { mutableStateOf(false) }
@@ -275,6 +277,28 @@ fun SettingsScreen(
                     }
                 )
 
+                SettingsPreferenceItem(
+                    headlineText = stringResource(R.string.keep_screen_on),
+                    supportingText = stringResource(R.string.keep_screen_on_desc),
+                    icon = Icons.Default.LightMode,
+                    position = SectionPosition.MIDDLE,
+                    trailingContent = {
+                        BouncySwitch(
+                            checked = keepScreenOn,
+                            onCheckedChange = {
+                                keepScreenOn = it
+                                settingsManager.keepScreenOn = it
+                            },
+                            thumbContent = {
+                                Icon(
+                                    imageVector = if (keepScreenOn) Icons.Default.Check else Icons.Default.Close,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(SwitchDefaults.IconSize)
+                                )
+                            }
+                        )
+                    }
+                )
 
                 SettingsPreferenceItem(
                     headlineText = stringResource(R.string.customization),

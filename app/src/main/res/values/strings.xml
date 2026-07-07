@@ -7,6 +7,8 @@
     <string name="author">Author</string>
     <string name="hifi_audio">Hi-Fi Audio</string>
     <string name="hifi_desc">Enable Hi-Fi detection and badges</string>
+    <string name="keep_screen_on">Keep Screen On</string>
+    <string name="keep_screen_on_desc">Prevent screen from turning off while in the app</string>
 
     <string name="general">General</string>
     <string name="cinematic_player">Cinematic Player</string>

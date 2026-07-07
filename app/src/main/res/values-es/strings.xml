@@ -8,6 +8,9 @@
     <string name="hifi_audio">Audio Hi-Fi</string>
     <string name="hifi_desc">Activar detección e insignias Hi-Fi</string>
 
+    <string name="keep_screen_on">Mantener Pantalla Encendida</string>
+    <string name="keep_screen_on_desc">Evita que la pantalla se apague mientras usas la app</string>
+
     <string name="general">General</string>
     <string name="cinematic_player">Reproductor Cinemático</string>
     <string name="cinematic_player_desc">Habilita una interfaz inmersiva con carátula en movimiento y degradado suave.</string>

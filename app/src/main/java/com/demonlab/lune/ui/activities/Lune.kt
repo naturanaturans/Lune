@@ -237,6 +237,15 @@ class Lune : AppCompatActivity() {
             var useAmoledPitchBlack by remember { mutableStateOf(settingsManager.useAmoledPitchBlack) }
             var isSectionCustomizationEnabled by remember { mutableStateOf(settingsManager.isSectionCustomizationEnabled) }
             var hiddenSectionTabs by remember { mutableStateOf(settingsManager.hiddenSectionTabs) }
+            var keepScreenOn by remember { mutableStateOf(settingsManager.keepScreenOn) }
+
+            LaunchedEffect(keepScreenOn) {
+                if (keepScreenOn) {
+                    window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                } else {
+                    window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                }
+            }
 
             if (showOnboarding) {
                 LuneTheme(
@@ -369,6 +378,7 @@ class Lune : AppCompatActivity() {
                         controlsColorPalette = settingsManager.controlsColorPalette
                         isSectionCustomizationEnabled = settingsManager.isSectionCustomizationEnabled
                         hiddenSectionTabs = settingsManager.hiddenSectionTabs
+                        keepScreenOn = settingsManager.keepScreenOn
                         if (hasPermission) {
                             musicViewModel.loadSongs()
                             musicViewModel.loadPlaylists()
