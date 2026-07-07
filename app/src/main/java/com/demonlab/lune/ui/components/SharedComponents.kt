@@ -16,7 +16,9 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -95,6 +97,7 @@ fun ResponsiveText(
     )
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SongItem(
     song: Song,
@@ -163,7 +166,7 @@ fun SongItem(
                         song.title,
                         maxLines = 1,
                         fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.weight(1f, fill = false),
+                        modifier = Modifier.weight(1f, fill = false).basicMarquee(),
                         color = if (currentlyPlaying) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                     )
                 }
@@ -171,24 +174,26 @@ fun SongItem(
             supportingContent = {
                 if (settingsManager.isBitrateOnList && (song.bitrate != null || song.format.isNotEmpty())) {
                     Column {
-                        Text(
-                            "${formatDuration(song.duration)} • ${song.artist}",
-                            maxLines = 1,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = if (currentlyPlaying) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        val bitrateText = if (song.bitrate != null) "${song.format} | ${song.bitrate / 1000}kbps" else song.format
-                        Text(
-                            bitrateText,
-                            maxLines = 1,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                        )
+                    Text(
+                        "${formatDuration(song.duration)} • ${song.artist}",
+                        maxLines = 1,
+                        modifier = Modifier.basicMarquee(),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = if (currentlyPlaying) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    val bitrateText = if (song.bitrate != null) "${song.format} | ${song.bitrate / 1000}kbps" else song.format
+                    Text(
+                        bitrateText,
+                        maxLines = 1,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                    )
                     }
                 } else {
                     Text(
                         "${formatDuration(song.duration)} • ${song.artist}",
                         maxLines = 1,
+                        modifier = Modifier.basicMarquee(),
                         style = MaterialTheme.typography.bodyMedium,
                         color = if (currentlyPlaying) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant
                     )
