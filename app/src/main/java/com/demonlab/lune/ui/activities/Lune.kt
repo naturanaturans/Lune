@@ -693,8 +693,11 @@ fun MainScreen(
     var activeIsSortAscending by remember(currentSortKey) {
         mutableStateOf(settingsManager.getIsSortAscending(currentSortKey))
     }
-    val sortedSongs = remember(filteredSongs, activeSortOption, activeIsSortAscending) {
-        playbackManager.getSortedList(filteredSongs, activeSortOption, activeIsSortAscending)
+    var activeIsCaseSensitive by remember(currentSortKey) {
+        mutableStateOf(settingsManager.getIsCaseSensitiveSort(currentSortKey))
+    }
+    val sortedSongs = remember(filteredSongs, activeSortOption, activeIsSortAscending, activeIsCaseSensitive) {
+        playbackManager.getSortedList(filteredSongs, activeSortOption, activeIsSortAscending, activeIsCaseSensitive)
     }
 
     
@@ -2180,11 +2183,14 @@ fun MainScreen(
         SortBottomSheet(
             sortOption = activeSortOption,
             isSortAscending = activeIsSortAscending,
-            onSortSettingsChange = { option, ascending ->
+            isCaseSensitive = activeIsCaseSensitive,
+            onSortSettingsChange = { option, ascending, caseSensitive ->
                 activeSortOption = option
                 activeIsSortAscending = ascending
+                activeIsCaseSensitive = caseSensitive
                 settingsManager.setSortOption(currentSortKey, option)
                 settingsManager.setIsSortAscending(currentSortKey, ascending)
+                settingsManager.setIsCaseSensitiveSort(currentSortKey, caseSensitive)
                 if (playbackManager.activePlaylistId == activeContextId) {
                     playbackManager.setSortSettings(option, ascending)
                 }

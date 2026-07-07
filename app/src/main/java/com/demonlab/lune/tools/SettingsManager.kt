@@ -91,6 +91,18 @@ class SettingsManager(context: Context) {
         prefs.edit().putBoolean("is_sort_ascending_$key", ascending).apply()
     }
 
+    var isCaseSensitiveSort: Boolean
+        get() = prefs.getBoolean("is_case_sensitive_sort", false)
+        set(value) = prefs.edit().putBoolean("is_case_sensitive_sort", value).apply()
+
+    fun getIsCaseSensitiveSort(key: String): Boolean {
+        return prefs.getBoolean("is_case_sensitive_sort_$key", isCaseSensitiveSort)
+    }
+
+    fun setIsCaseSensitiveSort(key: String, caseSensitive: Boolean) {
+        prefs.edit().putBoolean("is_case_sensitive_sort_$key", caseSensitive).apply()
+    }
+
     var isShuffle: Boolean
         get() = prefs.getBoolean("is_shuffle", false)
         set(value) = prefs.edit().putBoolean("is_shuffle", value).apply()

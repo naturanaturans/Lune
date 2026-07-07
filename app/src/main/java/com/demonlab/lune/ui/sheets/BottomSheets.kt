@@ -209,7 +209,8 @@ fun SongOptionsBottomSheet(
 fun SortBottomSheet(
     sortOption: String,
     isSortAscending: Boolean,
-    onSortSettingsChange: (String, Boolean) -> Unit,
+    isCaseSensitive: Boolean,
+    onSortSettingsChange: (String, Boolean, Boolean) -> Unit,
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -241,7 +242,7 @@ fun SortBottomSheet(
                 // Restore defaults circular button
                 IconButton(
                     onClick = {
-                        onSortSettingsChange("ALPHABETICAL", true)
+                        onSortSettingsChange("ALPHABETICAL", true, false)
                     },
                     modifier = Modifier
                         .size(40.dp)
@@ -262,7 +263,7 @@ fun SortBottomSheet(
                     shape = CircleShape,
                     color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
                     onClick = {
-                        onSortSettingsChange(sortOption, !isSortAscending)
+                        onSortSettingsChange(sortOption, !isSortAscending, isCaseSensitive)
                     }
                 ) {
                     Row(
@@ -278,7 +279,7 @@ fun SortBottomSheet(
                         BouncySwitch(
                             checked = isSortAscending,
                             onCheckedChange = {
-                                onSortSettingsChange(sortOption, it)
+                                onSortSettingsChange(sortOption, it, isCaseSensitive)
                             },
                             thumbContent = {
                                 Icon(
@@ -290,8 +291,45 @@ fun SortBottomSheet(
                         )
                     }
                 }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                // Pill Case-Sensitive Toggle
+                Surface(
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
+                    onClick = {
+                        onSortSettingsChange(sortOption, isSortAscending, !isCaseSensitive)
+                    }
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                    ) {
+                        Text(
+                            text = "Aa",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = if (isCaseSensitive) FontWeight.Bold else FontWeight.Normal,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
+                        BouncySwitch(
+                            checked = isCaseSensitive,
+                            onCheckedChange = {
+                                onSortSettingsChange(sortOption, isSortAscending, it)
+                            },
+                            thumbContent = {
+                                Icon(
+                                    imageVector = if (isCaseSensitive) Icons.Default.TextFields else Icons.Default.TextFormat,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(SwitchDefaults.IconSize)
+                                )
+                            }
+                        )
+                    }
+                }
             }
-            
+
             // Options cards
             val options = listOf(
                 "ALPHABETICAL" to R.string.sort_alphabetical,
@@ -310,7 +348,7 @@ fun SortBottomSheet(
                 
                 Surface(
                     onClick = {
-                        onSortSettingsChange(option, isSortAscending)
+                        onSortSettingsChange(option, isSortAscending, isCaseSensitive)
                     },
                     modifier = Modifier
                         .fillMaxWidth()
