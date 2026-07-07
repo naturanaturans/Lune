@@ -2036,7 +2036,21 @@ fun MainScreen(
                         val intent = Intent(context, LyricsActivity::class.java)
                         context.startActivity(intent)
                     },
-                    onRequestAudioPermission = onRequestAudioPermission
+                    onRequestAudioPermission = onRequestAudioPermission,
+                    onArtistClick = { artistName ->
+                        val artistAlbum = Album(
+                            id = artistName.hashCode().toLong(),
+                            name = artistName,
+                            artist = "",
+                            albumArtUri = visibleSongs.firstOrNull { it.artist == artistName }?.albumArtUri,
+                            coverUrl = visibleSongs.firstOrNull { it.artist == artistName }?.coverUrl,
+                            songs = visibleSongs.filter { it.artist == artistName }.sortedBy { it.title }
+                        )
+                        selectedAlbum = artistAlbum
+                        isAlbumView = false
+                        onIsPlayerExpandedChange(false)
+                        onSelectedFolderChange("ALBUMS")
+                    }
                 )
             }
         }

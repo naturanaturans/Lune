@@ -247,7 +247,8 @@ fun FullPlayer(
     useCustomControlsColor: Boolean,
     controlsColorPalette: Int,
     onShowLyrics: () -> Unit,
-    onRequestAudioPermission: () -> Unit
+    onRequestAudioPermission: () -> Unit,
+    onArtistClick: ((String) -> Unit)? = null
 ) {
     val context = LocalContext.current
     val settingsManager = remember { SettingsManager.getInstance(context) }
@@ -649,6 +650,7 @@ fun FullPlayer(
                             modifier = Modifier
                                 .weight(1f, fill = false)
                                 .widthIn(max = 280.dp)
+                                .clickable { onArtistClick?.invoke(song.artist) }
                         ) {
                             Text(
                                 song.artist,
